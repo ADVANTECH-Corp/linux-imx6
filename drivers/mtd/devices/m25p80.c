@@ -270,6 +270,9 @@ static int m25p_remove(struct spi_device *spi)
  * keep them available as module aliases for existing platforms.
  */
 static const struct spi_device_id m25p_ids[] = {
+#ifdef CONFIG_ARCH_ADVANTECH
+	{"n25qba16"},  {"n25qbb16"},
+#endif
 	/*
 	 * Allow non-DT platform devices to bind to the "spi-nor" modalias, and
 	 * hack around the fact that the SPI core does not provide uevent
