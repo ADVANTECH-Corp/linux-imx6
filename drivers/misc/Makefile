@@ -53,6 +53,7 @@ obj-y				+= mic/
 obj-$(CONFIG_GENWQE)		+= genwqe/
 obj-$(CONFIG_ECHO)		+= echo/
 obj-$(CONFIG_VEXPRESS_SYSCFG)	+= vexpress-syscfg.o
+obj-$(CONFIG_ADVANTECH_DUSTWSN)	+= adv-dustwsn.o
 obj-$(CONFIG_CXL_BASE)		+= cxl/
 obj-$(CONFIG_PANEL)             += panel.o
 
@@ -70,3 +71,4 @@ OBJCOPYFLAGS_lkdtm_rodata_objcopy.o := \
 targets += lkdtm_rodata.o lkdtm_rodata_objcopy.o
 $(obj)/lkdtm_rodata_objcopy.o: $(obj)/lkdtm_rodata.o FORCE
 	$(call if_changed,objcopy)
+obj-$(CONFIG_ADVANTECH_DUSTWSN)	+= adv-dustwsn.o
