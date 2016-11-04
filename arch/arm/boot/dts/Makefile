@@ -588,6 +588,16 @@ dtb-$(CONFIG_SOC_IMX7ULP) += \
 	imx7ulp-evk-wm8960.dtb \
 	imx7ulp-evk-hdmi.dtb \
 	imx7ulp-evk-sensors-to-i2c5.dtb
+dtb-$(CONFIG_ARCH_ADVANTECH) += \
+	imx6dl-ubc220-a1.dtb \
+	imx6q-ubcds31-a1.dtb \
+	imx6q-rom3420-a1.dtb \
+	imx6q-rsb4410-a1.dtb \
+	imx6q-rsb4410-a2.dtb \
+	imx6q-rom5420-a1.dtb \
+	imx6q-rom5420-b1.dtb \
+	imx6q-rom7420-a1.dtb \
+	imx6q-wise3310-a1.dtb
 dtb-$(CONFIG_SOC_LS1021A) += \
 	ls1021a-qds.dtb \
 	ls1021a-twr.dtb
