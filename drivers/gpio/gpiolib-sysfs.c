@@ -528,6 +528,10 @@ static struct class gpio_class = {
 	.class_attrs =	gpio_class_attrs,
 };
 
+#ifdef CONFIG_ARCH_ADVANTECH
+/* Rename gpio nodes in /sys/class/gpio */
+static int gpio_count = 1;
+#endif
 
 /**
  * gpiod_export - export a GPIO through sysfs
@@ -610,7 +614,13 @@ int gpiod_export(struct gpio_desc *desc, bool direction_may_change)
 	dev = device_create_with_groups(&gpio_class, &gdev->dev,
 					MKDEV(0, 0), data, gpio_groups,
 					ioname ? ioname : "gpio%u",
+#ifdef CONFIG_ARCH_ADVANTECH
+					gpio_count);
+					gpio_count++;
+#else
 					desc_to_gpio(desc));
+#endif
+
 	if (IS_ERR(dev)) {
 		status = PTR_ERR(dev);
 		goto err_free_data;
@@ -693,7 +703,10 @@ void gpiod_unexport(struct gpio_desc *desc)
 	dev = class_find_device(&gpio_class, NULL, desc, match_export);
 	if (!dev)
 		goto err_unlock;
-
+#ifdef CONFIG_ARCH_ADVANTECH
+	else
+		gpio_count--;
+#endif
 	data = dev_get_drvdata(dev);
 
 	clear_bit(FLAG_EXPORT, &desc->flags);
