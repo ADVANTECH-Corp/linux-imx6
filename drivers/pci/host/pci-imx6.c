@@ -36,6 +36,13 @@
 
 #include "pcie-designware.h"
 
+#ifdef CONFIG_ARCH_ADVANTECH
+#include <linux/proc-board.h>
+
+#define PCIE_RC_LCSR2   0xA0
+#define PCIE_RC_LCSR2_TRANSMIT_MARGIN   (1 << 8)
+#endif
+
 #define to_imx6_pcie(x)	container_of(x, struct imx6_pcie, pp)
 
 enum imx6_pcie_variants {
@@ -701,6 +708,15 @@ static int imx6_pcie_establish_link(struct imx6_pcie *imx6_pcie)
 		dw_pcie_writel_rc(pp, PCIE_RC_LCR, tmp);
 	}
 
+#ifdef CONFIG_ARCH_ADVANTECH
+	if(IS_ROM_7421) {
+		/* Change 0x1ffc0a0 register value from 0x10002 to 0x10102 for GEN-1 */
+		tmp = readl(pp->dbi_base + PCIE_RC_LCSR2);
+		tmp |= PCIE_RC_LCSR2_TRANSMIT_MARGIN;
+		writel(tmp, pp->dbi_base + PCIE_RC_LCSR2);
+	}
+#endif
+
 	/* Start LTSSM. */
 	if (imx6_pcie->variant == IMX7D)
 		regmap_update_bits(imx6_pcie->reg_src, 0x2c, BIT(6), BIT(6));
@@ -724,6 +740,15 @@ static int imx6_pcie_establish_link(struct imx6_pcie *imx6_pcie)
 		dev_info(dev, "Link: Gen2 disabled\n");
 		goto out;
 	}
+
+#ifdef CONFIG_ARCH_ADVANTECH
+        if(IS_ROM_7421) {
+		/* Change 0x1ffc0a0 register value from 0x10002 to 0x10102 for Gen-2*/
+		tmp = readl(pp->dbi_base + PCIE_RC_LCSR2);
+		tmp |= PCIE_RC_LCSR2_TRANSMIT_MARGIN;
+		writel(tmp, pp->dbi_base + PCIE_RC_LCSR2);
+	}
+#endif
 
 	/*
 	 * Start Directed Speed Change so the best possible speed both link
