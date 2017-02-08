@@ -32,6 +32,7 @@
 #include <linux/of_irq.h>
 #include <linux/spinlock.h>
 
+#ifndef CONFIG_ANDROID
 #ifdef CONFIG_ARCH_ADVANTECH
 #include <linux/proc-board.h>
 #include <linux/timer.h>
@@ -40,7 +41,7 @@ int send_event_flag=0;
 int suspend_key_flag = 0;
 int init_suspend_key_flag = 0;
 #endif
-
+#endif
 struct gpio_button_data {
 	const struct gpio_keys_button *button;
 	struct input_dev *input;
@@ -340,6 +341,7 @@ static struct attribute_group gpio_keys_attr_group = {
 	.attrs = gpio_keys_attrs,
 };
 
+#ifndef CONFIG_ANDROID
 #ifdef CONFIG_ARCH_ADVANTECH
 static void get_latest_button_code(unsigned int type, unsigned int code, int state)
 {
@@ -364,6 +366,7 @@ static void get_latest_button_code(unsigned int type, unsigned int code, int sta
 	}
 }
 #endif
+#endif
 
 static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
 {
@@ -371,14 +374,17 @@ static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
 	struct input_dev *input = bdata->input;
 	unsigned int type = button->type ?: EV_KEY;
 	int state = (gpio_get_value_cansleep(button->gpio) ? 1 : 0) ^ button->active_low;
+#ifndef CONFIG_ANDROID
 #ifdef CONFIG_ARCH_ADVANTECH
 	unsigned int latest_code;
+#endif
 #endif
 
 	if (type == EV_ABS) {
 		if (state)
 			input_event(input, type, button->code, button->value);
 	} else {
+#ifndef CONFIG_ANDROID
 #ifdef CONFIG_ARCH_ADVANTECH
 		if(IS_ROM_3420 || IS_ROM_5420) {
 			if(init_suspend_key_flag) {
@@ -406,6 +412,8 @@ static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
 #else
 		input_event(input, type, button->code, !!state);
 #endif
+#endif
+		input_event(input, type, button->code, !!state);
 	}
 	input_sync(input);
 }
@@ -573,12 +581,13 @@ static int gpio_keys_setup_key(struct platform_device *pdev,
 
 	input_set_capability(input, button->type ?: EV_KEY, button->code);
 
+#ifndef CONFIG_ANDROID
 #ifdef CONFIG_ARCH_ADVANTECH
 	/* We need to register KEY_POWER event, then upper API(key_event) will monitor KEY_POWER evnet */
 	if ( IS_ROM_3420 || IS_ROM_5420 )
 		input_set_capability(input, button->type ?: EV_KEY, KEY_POWER);
 #endif
-
+#endif
 	/*
 	 * Install custom action to cancel release timer and
 	 * workqueue item.
