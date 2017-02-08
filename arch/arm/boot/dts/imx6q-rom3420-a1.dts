@@ -546,6 +546,11 @@
 				MX6QDL_PAD_KEY_COL4__GPIO4_IO14		0x80000000	/* USB_OTG_OC */
 			>;
 		};
+		pinctrl_usbotg_2: usbotggrp-2 {
+			fsl,pins = <
+				MX6QDL_PAD_ENET_RX_ER__USB_OTG_ID	0x0001B0B0 /* USB_OTG_ID */
+			>;
+		};
 	};
 };
 
