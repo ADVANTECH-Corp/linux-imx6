@@ -62,7 +62,11 @@ static LIST_HEAD(component_list);
  * It can be used to eliminate pops between different playback streams, e.g.
  * between two audio tracks.
  */
+#ifdef CONFIG_ANDROID
+static int pmdown_time = -1;
+#else
 static int pmdown_time = 5000;
+#endif
 module_param(pmdown_time, int, 0);
 MODULE_PARM_DESC(pmdown_time, "DAPM stream powerdown time (msecs)");
 
