@@ -42,7 +42,7 @@
 	    status = "okay";
 	};
 	 
-	gpio-keys {
+	c8051-pwrbtn {
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_gpio_sleep_1>;
 		compatible = "c8051-pwrbtn";
@@ -72,7 +72,7 @@
 };
 
 &bkl {
-	lvds-bkl-enable = <&gpio6 9 1>;
+	lvds-bkl-enable = <&gpio6 9 0>;
 	lvds-vcc-enable = <&gpio6 7 0>;
 	pwms = <&pwm1 0 5000000>;
 	status = "okay";
@@ -158,7 +158,7 @@
 	};
 
 
-	gpio-keys {
+	c8051-pwrbtn {
 			pinctrl_gpio_sleep_1: gpio_sleep1grp-1 {
 			fsl,pins = <
 				MX6QDL_PAD_GPIO_1__GPIO1_IO01		0x80000000	/* SLEEP Button */
