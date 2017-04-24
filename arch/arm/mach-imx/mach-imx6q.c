@@ -40,13 +40,6 @@
 #include "cpuidle.h"
 #include "hardware.h"
 
-//#ifndef CONFIG_ARCH_ADVANTECH
-#include <linux/gpio.h>
-#include <linux/of_gpio.h>
-	/* Set LVDS backlight gpio */
-	#define LCD_BKLT_EN	IMX_GPIO_NR(6, 9)
-//#endif
-
 
 /* For imx6q sabrelite board: set KSZ9021RN RGMII pad skew */
 static int ksz9021rn_phy_fixup(struct phy_device *phydev)
@@ -489,11 +482,6 @@ static void __init imx6q_init_late(void)
 		imx6q_opp_init();
 		platform_device_register(&imx6q_cpufreq_pdev);
 	}
-//#ifndef CONFIG_ARCH_ADVANTECH
-		/* Set LVDS backlight */
-	gpio_direction_output(LCD_BKLT_EN, 0);
-//#endif
-
 }
 
 static void __init imx6q_map_io(void)
