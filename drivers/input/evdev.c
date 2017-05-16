@@ -1220,6 +1220,16 @@ static void evdev_disconnect(struct input_handle *handle)
 	put_device(&evdev->dev);
 }
 
+/* Added by EETI*/
+static bool evdev_match(struct input_handler *handler, struct input_dev *dev)
+{ 
+	/* Avoid EETI USB touchscreens */
+	#define VID_EETI 0x0EEF
+	 if ((BUS_USB == dev->id.bustype) && (VID_EETI == dev->id.vendor))
+	 return false;
+	 return true;
+}
+
 static const struct input_device_id evdev_ids[] = {
 	{ .driver_info = 1 },	/* Matches all devices */
 	{ },			/* Terminating zero entry */
@@ -1229,6 +1239,7 @@ MODULE_DEVICE_TABLE(input, evdev_ids);
 
 static struct input_handler evdev_handler = {
 	.event		= evdev_event,
+	.match = evdev_match, /* Added by EETI*/
 	.events		= evdev_events,
 	.connect	= evdev_connect,
 	.disconnect	= evdev_disconnect,
