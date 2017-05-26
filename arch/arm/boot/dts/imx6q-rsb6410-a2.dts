@@ -16,12 +16,12 @@
 #include "imx6qdl-advantech.dtsi"
 
 / {
-	model = "Freescale i.MX6 Quad RSB6410 A1";
+	model = "Freescale i.MX6 Quad RSB6410 A2";
 	compatible = "fsl,imx6q-sabresd", "fsl,imx6q";
 
 	board {
 		compatible = "proc-board";
-		board-type = "RSB-6410 A1";
+		board-type = "RSB-6410 A2";
 		board-cpu = "DualQuad";
 	};
 
