@@ -3462,7 +3462,7 @@ static void fec_enet_of_parse_stop_mode(struct platform_device *pdev)
 	fep->gpr.req_gpr = out_val[1];
 	fep->gpr.req_bit = out_val[2];
 }
-
+#if 0
 #ifdef CONFIG_ARCH_ADVANTECH
 static int
 fec_proc_write(struct file *file, const char __user * buffer,
@@ -3525,7 +3525,7 @@ static const struct file_operations net_testmode_fops = {
 	.write = fec_proc_write,
 };
 #endif
-
+#endif
 static int
 fec_probe(struct platform_device *pdev)
 {
@@ -3759,7 +3759,7 @@ fec_probe(struct platform_device *pdev)
 
 	pm_runtime_mark_last_busy(&pdev->dev);
 	pm_runtime_put_autosuspend(&pdev->dev);
-
+#if 0
 #ifdef CONFIG_ARCH_ADVANTECH
 	gdev = pdev;
 	proc_entry = proc_create("net_testmode", 0777, NULL, &net_testmode_fops);
@@ -3769,7 +3769,7 @@ fec_probe(struct platform_device *pdev)
 	}
 */
 #endif
-
+#endif
 	return 0;
 
 failed_register:
