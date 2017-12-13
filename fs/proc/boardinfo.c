@@ -1,7 +1,7 @@
 #ifdef CONFIG_ARCH_ADVANTECH
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
-
+#include <linux/module.h>
 extern char board_type[20];
 
 static int boardinfo_proc_show(struct seq_file *m, void *v)

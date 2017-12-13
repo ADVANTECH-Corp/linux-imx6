@@ -16,7 +16,7 @@
 #include <linux/of_gpio.h>
 #include <linux/of.h>
 #include <linux/of_platform.h>
-
+#include <linux/module.h>
 
 #define GPIO_CTRL_ADV_MODNAME		"gpio-ctrl-adv"
 

@@ -26,6 +26,11 @@
 #include <linux/mfd/syscon.h>
 #include <linux/regulator/consumer.h>
 
+#ifdef CONFIG_ARCH_ADVANTECH
+#include <linux/proc-board.h>
+#endif
+
+
 #define DRIVER_NAME "mxs_phy"
 
 /* Register Macro */
@@ -307,6 +312,9 @@ static int mxs_phy_hw_init(struct mxs_phy *mxs_phy)
 {
 	int ret;
 	void __iomem *base = mxs_phy->phy.io_priv;
+#ifdef CONFIG_ARCH_ADVANTECH
+	u32 val;	
+#endif
 
 	if (is_imx7ulp_phy(mxs_phy)) {
 		ret = mxs_phy_pll_enable(base, true);

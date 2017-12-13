@@ -2,7 +2,7 @@
 
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
-
+#include <linux/module.h>
 char board_uboot_version[100];
 
 static int uboot_version_proc_show(struct seq_file *m, void *v)
