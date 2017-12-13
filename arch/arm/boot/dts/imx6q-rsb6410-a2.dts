@@ -66,6 +66,12 @@
 			gpio-key,wakeup;
 		};
 	};
+        aliases {
+                mmc2 = &usdhc1;
+                mmc1 = &usdhc2;
+                mmc0 = &usdhc4;
+        };
+
 };
 
 &fec {
@@ -129,7 +135,7 @@
 
 &i2c2 {
 
-	hdmi: edid@50 {
+	hdmi_edid: edid@50 {
 		compatible = "fsl,imx6-hdmi-i2c";
 		reg = <0x50>;
 	};

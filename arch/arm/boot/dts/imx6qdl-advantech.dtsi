@@ -156,15 +156,14 @@
 	status = "okay";
 };
 
-&cpu0 {
-	arm-supply = <&reg_arm>;
-	soc-supply = <&reg_soc>;
-	pu-supply = <&reg_pu>; /* use pu_dummy if VDDSOC share with VDDPU */
+&clks {
+	assigned-clocks = <&clks IMX6QDL_CLK_LDB_DI0_SEL>,
+			  <&clks IMX6QDL_CLK_LDB_DI1_SEL>;
+	assigned-clock-parents = <&clks IMX6QDL_CLK_PLL2_PFD0_352M>,
+				 <&clks IMX6QDL_CLK_PLL2_PFD0_352M>;
 };
 
 &clks {
-	fsl,ldb-di0-parent = <&clks IMX6QDL_CLK_PLL2_PFD0_352M>;
-	fsl,ldb-di1-parent = <&clks IMX6QDL_CLK_PLL2_PFD0_352M>;
 };
 
 &ecspi1 {
@@ -1094,6 +1093,13 @@
 };
 
 &ssi2 {
+	assigned-clocks = <&clks IMX6QDL_CLK_PLL4>,
+			  <&clks IMX6QDL_PLL4_BYPASS>,
+			  <&clks IMX6QDL_CLK_SSI2_SEL>;
+	assigned-clock-parents = <&clks IMX6QDL_CLK_OSC>,
+				 <&clks IMX6QDL_CLK_PLL4>,
+				 <&clks IMX6QDL_CLK_PLL4_AUDIO_DIV>;
+	assigned-clock-rates = <1179648000>, <0>, <0>;
 	status = "okay";
 };
 

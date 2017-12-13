@@ -47,7 +47,7 @@
 			linux,input-type = <1>;	/* EV_KEY */
 			linux,code = <116>;	/* KEY_POWER */
 			debounce_interval = <1>;
-			gpio-key,wakeup;
+			wakeup-source;
 		};
 	};
 
@@ -71,6 +71,11 @@
 			default-state = "on";
 		};
 	};
+        aliases {
+                mmc1 = &usdhc2;
+                mmc0 = &usdhc4;
+        };
+
 };
 
 &audio_sgtl5000 {
@@ -208,7 +213,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			hdmi: edid@50 {
+			hdmi_edid: edid@50 {
 				compatible = "fsl,imx6-hdmi-i2c";
 				reg = <0x50>;
 			};

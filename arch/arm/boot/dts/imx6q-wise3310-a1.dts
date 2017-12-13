@@ -31,6 +31,11 @@
 		pinctrl-0 = <&pinctrl_dustwsn_0>;
 		status = "okay";
 	};
+	aliases {
+                mmc1 = &usdhc2;
+                mmc0 = &usdhc4;
+        };
+
 };
 
 &audio_sgtl5000 {

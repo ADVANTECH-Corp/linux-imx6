@@ -32,6 +32,11 @@
 		gpios=<&gpio1 2 1>;
 		linux,rc-map-name = "rc-rc6-mce";
 	};
+	aliases {
+		mmc1 = &usdhc2;
+		mmc0 = &usdhc4;
+	};
+
 };
 
 &audio_sgtl5000 {
@@ -65,7 +70,7 @@
 
 &i2c2 {
 
-	hdmi: edid@50 {
+	hdmi_edid: edid@50 {
 		compatible = "fsl,imx6-hdmi-i2c";
 		reg = <0x50>;
 	};
