@@ -32,6 +32,12 @@ config BT_HCIBTUSB_BCM
 
 	  Say Y here to compile support for Broadcom protocol.
 
+config BT_RTKBTUSB
+	tristate "RTK HCI USB driver"
+	depends on USB
+	help
+	  RTK Bluetooth HCI USB driver
+
 config BT_HCIBTSDIO
 	tristate "HCI SDIO driver"
 	depends on MMC
