@@ -274,8 +274,9 @@ static long adv_wdt_ioctl(struct file *file, unsigned int cmd,
 		if (get_user(new_value, p))
 			return -EFAULT;
 
-		if ((new_value < 0) || (new_value > ADV_WDT_MAX_TIME))
+		if ((new_value < 1) || (new_value > ADV_WDT_MAX_TIME))
 		{
+			pr_err("timeout value must be between 1 and %d\n", ADV_WDT_MAX_TIME);
 			return -EINVAL;
 		}
 		adv_wdt.timeout = new_value;
