@@ -17,3 +17,7 @@ It is based on [Freescale's kernel source tree](http://git.freescale.com/git/cgi
 ## Yocto 2.2 (Morty)
 
 * imx_4.9.11_1.0.0_ga
+
+## Yocto 2.5 (Sumo)
+
+* imx_4.14.78_1.0.0_ga
