@@ -115,14 +115,14 @@ void enable_ldb_bkl_pwm(void)
 	printk(KERN_INFO "[LVDS Sequence] 4 Start to enable LVDS backlight.\n");
 
 	// Backlight On (VCC)
-	if (bklt_vdd_enable > 0)
+	if (bklt_vcc_enable > 0)
 	{
-		ret = gpio_request(bklt_vdd_enable,"bklt_vdd_enable");
+		ret = gpio_request(bklt_vcc_enable,"bklt_vdd_enable");
 
 		if (ret < 0)
 			printk("\nRequest bklt_vdd_enable failed!!\n");
 		else
-			gpio_direction_output(bklt_vdd_enable, bklt_vcc_flag);
+			gpio_direction_output(bklt_vcc_enable, bklt_vcc_flag);
 	}
 
 	mdelay(lvds_bkl_delay_value);
