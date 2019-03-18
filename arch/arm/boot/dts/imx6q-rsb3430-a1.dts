@@ -60,8 +60,8 @@
 
 &bkl {
 	lvds-bkl-enable = <&gpio1 20 1>;
-	lvds-vcc-enable = <&gpio4 7 1>;
-	bklt-vcc-enable = <&gpio4 6 1>;
+	lvds-vcc-enable = <&gpio4 7 0>;
+	bklt-vcc-enable = <&gpio4 6 0>;
 	pwms = <&pwm4 0 5000000>;
 	status = "okay";
 };
@@ -81,7 +81,7 @@
 		VDDIO-supply = <&reg_3p3v>;
 		mclk = <16000000>;
 		mclk_source = <0>;
-	};                       
+	};
 
 	s35390a@30 {
 		compatible = "fsl,s35390a";

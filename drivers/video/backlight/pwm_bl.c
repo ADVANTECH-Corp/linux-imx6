@@ -122,7 +122,7 @@ void enable_ldb_bkl_pwm(void)
 		if (ret < 0)
 			printk("\nRequest bklt_vdd_enable failed!!\n");
 		else
-			gpio_direction_output(bklt_vdd_enable, bklt_vdd_flag);
+			gpio_direction_output(bklt_vdd_enable, bklt_vcc_flag);
 	}
 
 	mdelay(lvds_bkl_delay_value);
