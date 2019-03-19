@@ -52,6 +52,12 @@
 			linux,default-trigger = "heartbeat";
 		};
 	};
+
+	gpio_direction {
+		pinctrl-names = "default";
+		compatible = "gpio-set-direction";
+		usb-host-pwr-en = <&gpio1 19 1>; /* MINICARD_PWR_EN */
+	};
 };
 
 &audio_sgtl5000 {
@@ -59,6 +65,7 @@
 };
 
 &bkl {
+	pinctrl-0 = <&pinctrl_lvds_bkl_2 &pinctrl_lvds_vcc_1 &pinctrl_bklt_vcc_1>;
 	lvds-bkl-enable = <&gpio1 20 1>;
 	lvds-vcc-enable = <&gpio4 7 0>;
 	bklt-vcc-enable = <&gpio4 6 0>;
@@ -116,14 +123,13 @@
 				MX6QDL_PAD_GPIO_2__GPIO1_IO02		0x80000000	/* SD card - SD2_WP */
 				MX6QDL_PAD_GPIO_4__GPIO1_IO04		0x80000000	/* SD card - SD2_CD */
 				MX6QDL_PAD_EIM_D30__GPIO3_IO30		0x0001B0B0	/* BORAD_ID0 */
-				MX6QDL_PAD_EIM_D31__GPIO3_IO31		0x000130B0	/* BORAD_ID1 */
+				MX6QDL_PAD_EIM_D31__GPIO3_IO31		0x0001B0B0	/* BORAD_ID1 */
 				MX6QDL_PAD_GPIO_0__CCM_CLKO1            0x130b0		/* AUDIO CLK */
 			>;
 		};
 
 		pinctrl_hog_2: hoggrp-2 {
 			fsl,pins = <
-				MX6QDL_PAD_NANDF_CS2__GPIO6_IO15	0x0001B0B0	/* M2_RESET# */
 				MX6QDL_PAD_SD3_RST__GPIO7_IO08		0x0001B0B0	/* SD3_RST# */
 				MX6QDL_PAD_SD3_DAT7__GPIO6_IO17		0x0001B0B0	/* SD3_WAKE# */
 				MX6QDL_PAD_SD1_DAT3__GPIO1_IO21		0x0001B0B0	/* UART1_WAKE# */
@@ -150,7 +156,7 @@
 	leds {
 		pinctrl_leds_debug_1: leds_debug1grp-1{
 			fsl,pins = <
-				MX6QDL_PAD_GPIO_17__GPIO7_IO12		0x80000000	/* gpio - led */
+				MX6QDL_PAD_GPIO_17__GPIO7_IO12		0x80000000	/* GPIO_LED# */
 			>;
 		};
 	};
@@ -159,7 +165,14 @@
 		pinctrl_pcie_1: pcie1grp-1 {
 			fsl,pins = <
 				MX6QDL_PAD_SD1_DAT1__GPIO1_IO17		0x80000000	/* M2_PWR_EN */
+				MX6QDL_PAD_NANDF_CS2__GPIO6_IO15	0x80000000	/* M2_RESET#_3V3 */
+				MX6QDL_PAD_NANDF_CS3__GPIO6_IO16	0x80000000	/* M2_W_DIS1#_3V3 */
+				MX6QDL_PAD_NANDF_ALE__GPIO6_IO08	0x80000000	/* M2_W_DIS2#_3V3 */
+				MX6QDL_PAD_SD3_DAT6__GPIO6_IO18		0x80000000	/* M2_IRQ# */
 				MX6QDL_PAD_SD1_DAT2__GPIO1_IO19		0x80000000	/* MINICARD_PWR_EN */
+				MX6QDL_PAD_NANDF_RB0__GPIO6_IO10	0x80000000	/* MINICARD_RESET# */
+				MX6QDL_PAD_NANDF_D0__GPIO2_IO00		0x80000000	/* MINICARD_W_DIS# */
+				MX6QDL_PAD_NANDF_D4__GPIO2_IO04		0x80000000	/* MINICARD_DET# */
 			>;
 		};
 	};
@@ -211,6 +224,11 @@
 	};
 };
 
+
+&lcd {
+	status = "disabled";
+};
+
 &mxcfb1 {
 	status = "okay";
 };
@@ -226,7 +244,8 @@
 &pcie {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pcie_1>;
-	disable-gpio = <&gpio5 18 0>;
+	power-on-gpio = <&gpio1 17 0>;
+	reset-gpio = <&gpio6 15 1>;
 	status = "okay";
 };
 
@@ -234,7 +253,10 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm4_1>;
 	status = "okay";
+};
 
+&snvs_rtc {
+	status = "disabled";
 };
 
 &uart1 {
