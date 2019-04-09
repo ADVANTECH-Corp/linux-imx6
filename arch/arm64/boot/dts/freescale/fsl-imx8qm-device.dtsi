@@ -1109,6 +1109,24 @@
 				reg = <SC_R_SPI_0>;
 				#power-domain-cells = <0>;
 				power-domains = <&pd_dma>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				pd_dma0_chan0: PD_LPSPI0_RX {
+					reg = <SC_R_DMA_0_CH0>;
+					power-domains =<&pd_dma_lpspi0>;
+					#power-domain-cells = <0>;
+					#address-cells = <1>;
+					#size-cells = <0>;
+
+					pd_dma0_chan1: PD_LPSPI0_TX {
+						reg = <SC_R_DMA_0_CH1>;
+						power-domains =<&pd_dma0_chan0>;
+						#power-domain-cells = <0>;
+						#address-cells = <1>;
+						#size-cells = <0>;
+			};
+				};
 			};
 			pd_dma_lpspi1: PD_DMA_SPI_1 {
 				reg = <SC_R_SPI_1>;
@@ -1124,6 +1142,24 @@
 				reg = <SC_R_SPI_3>;
 				#power-domain-cells = <0>;
 				power-domains = <&pd_dma>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				pd_dma0_chan6: PD_LPSPI3_RX {
+					reg = <SC_R_DMA_0_CH6>;
+					power-domains =<&pd_dma_lpspi3>;
+					#power-domain-cells = <0>;
+					#address-cells = <1>;
+					#size-cells = <0>;
+
+					pd_dma0_chan7: PD_LPSPI3_TX {
+						reg = <SC_R_DMA_0_CH7>;
+						power-domains =<&pd_dma0_chan6>;
+						#power-domain-cells = <0>;
+						#address-cells = <1>;
+						#size-cells = <0>;
+					};
+				};
 			};
 			pd_dma_emvsim0: PD_DMA_EMVSIM_0 {
 				reg = <SC_R_EMVSIM_0>;
