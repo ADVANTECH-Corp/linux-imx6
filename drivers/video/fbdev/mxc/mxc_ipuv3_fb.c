@@ -61,6 +61,11 @@
 
 /* Display port number */
 #define MXCFB_PORT_NUM	2
+
+#ifdef CONFIG_ARCH_ADVANTECH
+char fb_vga_fix_id[30];
+#endif
+
 /*!
  * Structure containing the MXC specific framebuffer information.
  */
@@ -214,6 +219,12 @@ enum {
 
 static bool g_dp_in_use[2];
 LIST_HEAD(fb_alloc_list);
+
+#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
+static int first_power_on = 1;
+extern void enable_lcd_vdd_en(void);
+extern void enable_ldb_bkl_pwm(void);
+#endif
 
 /* Return default standard(RGB) pixel format */
 static uint32_t bpp_to_pixfmt(int bpp)
@@ -1284,6 +1295,16 @@ static int mxcfb_set_par(struct fb_info *fbi)
 			return -EINVAL;
 		}
 	}
+
+#ifdef CONFIG_ARCH_ADVANTECH
+	/* overlay should be smaller than BG */
+	if (ovfbi_enable) {
+		if ((mxc_fbi->ovfbi->var.xres > fbi->var.xres) || (mxc_fbi->ovfbi->var.yres > fbi->var.yres)) {
+			mxc_fbi_fg->cur_blank = mxc_fbi_fg->next_blank = FB_BLANK_POWERDOWN;
+			ovfbi_enable = false;
+		}
+	}
+#endif
 
 	if (!on_the_fly) {
 		_setup_disp_channel1(fbi);
@@ -2380,6 +2401,12 @@ mxcfb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
 			return -EINVAL;
 		if (bg_mxcfbi->cur_blank != FB_BLANK_UNBLANK)
 			return -EINVAL;
+
+#ifdef CONFIG_ARCH_ADVANTECH
+		/* overlay should be smaller than BG */
+		if ((info->var.xres > fbi_tmp->var.xres) || (info->var.yres > fbi_tmp->var.yres))
+			return -EINVAL;			
+#endif
 	}
 	if (mxc_fbi->cur_blank != FB_BLANK_UNBLANK)
 		return -EINVAL;
@@ -2608,6 +2635,14 @@ next:
 	}
 
 	dev_dbg(info->device, "Update complete\n");
+
+#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
+	if(first_power_on)
+	{
+		enable_ldb_bkl_pwm();
+		first_power_on = 0;
+	}
+#endif
 
 	info->var.yoffset = var->yoffset;
 	mxc_fbi->cur_var.xoffset = var->xoffset;
@@ -3032,8 +3067,32 @@ static int mxcfb_dispdrv_init(struct platform_device *pdev,
 
 	dev_info(&pdev->dev, "registered mxc display driver %s\n", disp_dev);
 
+#ifdef CONFIG_ARCH_ADVANTECH
+  /* dirty! need to fix */
+	if(!strcmp(disp_dev, "lcd"))
+	{
+		char bg0_id[] = "DISP3 BG";
+		char bg1_id[] = "DISP3 BG - DI1";
+		char fg_id[] = "DISP3 FG";
+
+		if (mxcfbi->ipu_di == 0) {
+			bg0_id[4] += mxcfbi->ipu_id;
+			strcpy(fb_vga_fix_id, bg0_id);
+		} else if (mxcfbi->ipu_di == 1) {
+			bg1_id[4] += mxcfbi->ipu_id;
+			strcpy(fb_vga_fix_id, bg1_id);
+		} else { /* Overlay */
+			fg_id[4] += mxcfbi->ipu_id;
+			strcpy(fb_vga_fix_id, fg_id);
+		}
+		printk("*****VGA fb name %s", fb_vga_fix_id);
+	}
+#endif
 	return ret;
 }
+#ifdef CONFIG_ARCH_ADVANTECH
+EXPORT_SYMBOL_GPL(fb_vga_fix_id);
+#endif
 
 /*
  * Parse user specified options (`video=trident:')
@@ -3472,6 +3531,16 @@ static int mxcfb_probe(struct platform_device *pdev)
 		return ret;
 	}
 
+#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
+	if(first_power_on) {
+		printk(KERN_INFO "[LVDS Sequence] 1 Start to enable LVDS VDD.\n");
+
+		enable_lcd_vdd_en();
+
+		printk(KERN_INFO "[LVDS Sequence] 2 Start to enable LVDS signal.\n");
+	}
+#endif
+
 	/* Initialize FB structures */
 	fbi = mxcfb_init_fbinfo(&pdev->dev, &mxcfb_ops);
 	if (!fbi) {
@@ -3524,6 +3593,7 @@ static int mxcfb_probe(struct platform_device *pdev)
 		mxcfbi->ipu_ch_nf_irq = IPU_IRQ_BG_SYNC_NFACK;
 		mxcfbi->ipu_alp_ch_irq = IPU_IRQ_BG_ALPHA_SYNC_EOF;
 		mxcfbi->ipu_ch = MEM_BG_SYNC;
+
 		/* Unblank the primary fb only by default */
 		if (pdev->id == 0)
 			mxcfbi->cur_blank = mxcfbi->next_blank = FB_BLANK_UNBLANK;
