@@ -158,12 +158,6 @@
 	status = "okay";
 };
 
-&cpu0 {
-	arm-supply = <&reg_arm>;
-	soc-supply = <&reg_soc>;
-	pu-supply = <&reg_pu>; /* use pu_dummy if VDDSOC share with VDDPU */
-};
-
 &clks {
 	assigned-clocks = <&clks IMX6QDL_CLK_LDB_DI0_SEL>,
 			  <&clks IMX6QDL_CLK_LDB_DI1_SEL>;
@@ -302,9 +296,19 @@
 				MX6QDL_PAD_KEY_COL0__GPIO4_IO06		0x170b0		/* LCD_BKLT_EN */
 			>;
 		};
+		pinctrl_lvds_bkl_2: lvds_bklgrp-2 {
+			fsl,pins = <
+				MX6QDL_PAD_SD1_CLK__GPIO1_IO20		0x170b0		/* LCD_BKLT_EN */
+			>;
+		};
 		pinctrl_lvds_vcc_1: lvds_vccgrp-1 {
 			fsl,pins = <
 				MX6QDL_PAD_KEY_ROW0__GPIO4_IO07		0x170b0		/* LCD_VDD_EN */
+			>;
+		};
+		pinctrl_bklt_vcc_1: bklt_vccgrp-1 {
+			fsl,pins = <
+				MX6QDL_PAD_KEY_COL0__GPIO4_IO06		0x170b0		/* VDD_BKLT_EN */
 			>;
 		};
 	};
@@ -975,8 +979,8 @@
 		status = "okay";
 
 		display-timings {
-			native-mode = <&timing0>;
-			timing0: g070vw01v0 {
+			native-mode = <&timing00>;
+			timing00: g070vw01v0 {
 				clock-frequency = <29500000>;
 				hactive = <800>;
 				vactive = <480>;
@@ -987,9 +991,9 @@
 				hsync-len = <72>;
 				vsync-len = <7>;
 			};
-/*
+
 			//SI Test panel
-			timing0: g150xgel04 {
+			timing10: g150xgel04 {
 				clock-frequency = <63500000>;
 				hactive = <1024>;
 				vactive = <768>;
@@ -1001,7 +1005,7 @@
 				vsync-len = <4>;
 			};
 			//Dual channel panel
-			timing0: g190eg01v1 {
+			timing20: g190eg01v1 {
 				clock-frequency = <109000000>;
 				hactive = <1280>;
 				vactive = <1024>;
@@ -1013,7 +1017,7 @@
 				vsync-len = <7>;
 			};
 			//Dual channel panel 
-			timing0: g215hvn0 {
+			timing30: g215hvn0 {
 				clock-frequency = <170000000>;
 				hactive = <1920>;
 				vactive = <1080>;
@@ -1024,7 +1028,18 @@
 				hsync-len = <60>;
 				vsync-len = <7>;
 			};
-*/
+
+			timing40:g150xgel05 {
+				clock-frequency = <65000000>;
+				hactive = <1024>;
+				vactive = <768>;
+				hback-porch = <220>;
+				hfront-porch = <40>;
+				vback-porch = <21>;
+				vfront-porch = <7>;
+				hsync-len = <60>;
+				vsync-len = <10>;
+			};
 		};
 	};
 
@@ -1036,8 +1051,8 @@
 		status = "okay";
 
 		display-timings {
-			native-mode = <&timing1>;
-			timing1: g070vw01v0 {
+			native-mode = <&timing01>;
+			timing01: g070vw01v0 {
 				clock-frequency = <29500000>;
 				hactive = <800>;
 				vactive = <480>;
@@ -1048,9 +1063,9 @@
 				hsync-len = <72>;
 				vsync-len = <7>;
 			};
-/*
+
 			//SI Test panel
-			timing1: g150xgel04 {
+			timing11: g150xgel04 {
 				clock-frequency = <63500000>;
 				hactive = <1024>;
 				vactive = <768>;
@@ -1061,7 +1076,18 @@
 				hsync-len = <104>;
 				vsync-len = <4>;
 			};
-*/
+
+			timing21:g150xgel05 {
+				clock-frequency = <65000000>;
+				hactive = <1024>;
+				vactive = <768>;
+				hback-porch = <220>;
+				hfront-porch = <40>;
+				vback-porch = <21>;
+				vfront-porch = <7>;
+				hsync-len = <60>;
+				vsync-len = <10>;
+			};
 		};
 	};
 };
@@ -1092,4 +1118,8 @@
 
 &usbphy2 {
 	fsl,tx-d-cal = <106>;
+};
+
+&snvs_poweroff {
+	status = "okay";
 };

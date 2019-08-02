@@ -64,6 +64,12 @@
 
 #ifdef CONFIG_ARCH_ADVANTECH
 char fb_vga_fix_id[30];
+
+#if defined(CONFIG_OF)
+int first_flip_complete = 1;
+extern void enable_lcd_vdd_en(void);
+#endif
+
 #endif
 
 /*!
@@ -219,12 +225,6 @@ enum {
 
 static bool g_dp_in_use[2];
 LIST_HEAD(fb_alloc_list);
-
-#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
-static int first_power_on = 1;
-extern void enable_lcd_vdd_en(void);
-extern void enable_ldb_bkl_pwm(void);
-#endif
 
 /* Return default standard(RGB) pixel format */
 static uint32_t bpp_to_pixfmt(int bpp)
@@ -2624,6 +2624,13 @@ next:
 		return -EBUSY;
 	}
 
+#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
+	if (first_flip_complete) {
+		enable_lcd_vdd_en();
+		first_flip_complete = 0;
+	}
+#endif
+
 	if (mxc_fbi->cur_prefetch && ipu_pre_yres_is_small(info->var.yres)) {
 		ret = wait_for_completion_timeout(&mxc_fbi->flip_complete,
 						  HZ/2);
@@ -2635,14 +2642,6 @@ next:
 	}
 
 	dev_dbg(info->device, "Update complete\n");
-
-#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
-	if(first_power_on)
-	{
-		enable_ldb_bkl_pwm();
-		first_power_on = 0;
-	}
-#endif
 
 	info->var.yoffset = var->yoffset;
 	mxc_fbi->cur_var.xoffset = var->xoffset;
@@ -3531,16 +3530,6 @@ static int mxcfb_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
-	if(first_power_on) {
-		printk(KERN_INFO "[LVDS Sequence] 1 Start to enable LVDS VDD.\n");
-
-		enable_lcd_vdd_en();
-
-		printk(KERN_INFO "[LVDS Sequence] 2 Start to enable LVDS signal.\n");
-	}
-#endif
-
 	/* Initialize FB structures */
 	fbi = mxcfb_init_fbinfo(&pdev->dev, &mxcfb_ops);
 	if (!fbi) {
@@ -3594,16 +3583,11 @@ static int mxcfb_probe(struct platform_device *pdev)
 		mxcfbi->ipu_alp_ch_irq = IPU_IRQ_BG_ALPHA_SYNC_EOF;
 		mxcfbi->ipu_ch = MEM_BG_SYNC;
 
-#ifdef CONFIG_ARCH_ADVANTECH
-		/* Unblank all the fb by default */
-		mxcfbi->cur_blank = mxcfbi->next_blank = FB_BLANK_UNBLANK;
-#else
 		/* Unblank the primary fb only by default */
 		if (pdev->id == 0)
 			mxcfbi->cur_blank = mxcfbi->next_blank = FB_BLANK_UNBLANK;
 		else
 			mxcfbi->cur_blank = mxcfbi->next_blank = FB_BLANK_POWERDOWN;
-#endif
 
 		ret = mxcfb_register(fbi);
 		if (ret < 0)

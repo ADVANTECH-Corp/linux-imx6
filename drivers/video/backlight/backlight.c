@@ -31,6 +31,13 @@ static const char *const backlight_types[] = {
 	[BACKLIGHT_FIRMWARE] = "firmware",
 };
 
+#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
+int blank_count = 0;
+extern void enable_ldb_signal(void);
+extern void enable_ldb_bkl_vcc(void);
+extern void enable_ldb_bkl_pwm(void);
+#endif
+
 #if defined(CONFIG_FB) || (defined(CONFIG_FB_MODULE) && \
 			   defined(CONFIG_BACKLIGHT_CLASS_DEVICE_MODULE))
 /* This callback gets called when something important happens inside a
@@ -49,6 +56,14 @@ static int fb_notifier_callback(struct notifier_block *self,
 	if (event != FB_EVENT_BLANK && event != FB_EVENT_CONBLANK)
 		return 0;
 
+#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
+	if (blank_count == 0)
+	{
+		//enable_ldb_signal();
+		blank_count++;
+		return 0;
+	}
+#endif
 	bd = container_of(self, struct backlight_device, fb_notif);
 	mutex_lock(&bd->ops_lock);
 	if (bd->ops)
@@ -61,7 +76,23 @@ static int fb_notifier_callback(struct notifier_block *self,
 				if (!bd->use_count++) {
 					bd->props.state &= ~BL_CORE_FBBLANK;
 					bd->props.fb_blank = FB_BLANK_UNBLANK;
+#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
+					switch (blank_count)
+					{
+					case 1:
+						enable_ldb_bkl_vcc();
+						backlight_update_status(bd); //PWM
+						enable_ldb_bkl_pwm();
+						blank_count++;
+						break;
+					default:
+						backlight_update_status(bd);
+						break;
+					}
+#else
 					backlight_update_status(bd);
+#endif
+
 				}
 			} else if (fb_blank != FB_BLANK_UNBLANK &&
 				   bd->fb_bl_on[node]) {
