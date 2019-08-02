@@ -24,6 +24,15 @@
 	model = "NXP i.MX8X SMARC 2.0 Computer-on-Module";
 	compatible = "fsl,imx8qxp-mek", "fsl,imx8qxp";
 
+	aliases {
+		i2c0 = &i2c0_csi0;
+		i2c1 = &i2c0_cm40;
+		i2c2 = &i2c0_mipi_lvds0;
+		i2c3 = &i2c0_mipi_lvds1;
+		i2c4 = &i2c1;
+		i2c5 = &i2c_sw1;
+	};
+
 	chosen {
 		bootargs = "console=ttyLP0,115200 earlycon=lpuart32,0x5a060000,115200";
 		stdout-path = &lpuart0;
@@ -33,6 +42,23 @@
 		compatible = "simple-bus";
 		#address-cells = <1>;
 		#size-cells = <0>;
+
+		reg_can_en: regulator-can-gen {
+			compatible = "regulator-fixed";
+			regulator-name = "can-en";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			enable-active-high;
+		};
+
+		reg_can_stby: regulator-can-stby {
+			compatible = "regulator-fixed";
+			regulator-name = "can-stby";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			enable-active-high;
+			vin-supply = <&reg_can_en>;
+		};
 
 		/* SDIO_PWR_EN */
 		reg_usdhc2_vmmc: usdhc2_vmmc {
@@ -60,7 +86,7 @@
 			regulator-name = "usb_otg1_vbus";
 			regulator-min-microvolt = <5000000>;
 			regulator-max-microvolt = <5000000>;
-			gpio = <&gpio4 3 GPIO_ACTIVE_HIGH>;
+			gpio = <&gpio4 3 GPIO_ACTIVE_LOW>;
 			enable-active-high;
 		};
 		/* USB1_EN_OC# */
@@ -69,16 +95,16 @@
 			regulator-name = "usb_otg2_vbus";
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
-			gpio = <&gpio4 5 GPIO_ACTIVE_HIGH>;
+			gpio = <&gpio4 5 GPIO_ACTIVE_LOW>;
 			enable-active-high;
 		};
 	};
 
 #ifdef ROM_DB5901
 	sound: sound {
-		compatible = "fsl,sgtl5000";
+		compatible = "fsl,imx-audio-sgtl5000";
 		model = "sgtl50000";
-		cpu-dai = <&sai1>;
+		ssi-controller = <&sai1>;
 		audio-codec = <&codec>;
 		codec-master;
 		audio-routing =
@@ -548,12 +574,14 @@
 &flexcan1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan1>;
+	xceiver-supply = <&reg_can_stby>;
 	status = "okay";
 };
 
 &flexcan2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan2>;
+	xceiver-supply = <&reg_can_stby>;
 	status = "okay";
 };
 
@@ -563,17 +591,14 @@
 	fsl,spi-num-chipselects = <1>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_lpspi0>;
-	cs-gpios = <&gpio1 8 GPIO_ACTIVE_LOW>;
+	cs-gpios = <&gpio1 8 GPIO_ACTIVE_HIGH>;
 	status = "okay";
 
 #ifdef ROM_DB5901
-	flash1: n25q256a@0 {
+	spi_nor: m25p80@0 {
+		compatible = "micron,n25qba16";
+		spi-max-frequency = <10000000>;
 		reg = <0>;
-		#address-cells = <1>;
-		#size-cells = <1>;
-		compatible = "micron,n25q256a";
-		spi-max-frequency = <29000000>;
-		spi-nor,ddr-quad-read-dummy = <6>;
 	};
 #endif
 };
@@ -583,7 +608,7 @@
 	pinctrl-0 = <&pinctrl_flexspi0>;
 	status = "okay";
 
-	flash0: w25q64fwssig@0 {
+	qspi_nor: w25q64fwssig@0 {
 		reg = <0>;
 		#address-cells = <1>;
 		#size-cells = <1>;
@@ -597,6 +622,17 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexspi1>;
 	status = "okay";
+
+#ifdef ROM_DB5901
+	qspi_nor1: w25q64fwssig@0 {
+		reg = <0>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor", "winbond,w25q64";
+		spi-max-frequency = <29000000>;
+		spi-nor,quad-read = <4>;
+	};
+#endif
 };
 
 &pd_cm40_intmux {
@@ -643,9 +679,10 @@
 		compatible = "st,st33htpm-i2c";
 		reg= <0x2e>;
 		pinctrl-names = "default";
-                pinctrl-0 = <&pinctrl_tpm>;
-                interrupt-parent = <&gpio3>;
-                interrupts = <15 IRQ_TYPE_LEVEL_HIGH>;
+		pinctrl-0 = <&pinctrl_tpm>;
+		interrupt-parent = <&gpio3>;
+		interrupts = <15 IRQ_TYPE_LEVEL_HIGH>;
+		status = "disabled";
 	};
 
 	rtc0: rx8900@32 {
@@ -653,6 +690,7 @@
 		reg = <0x32>;
 		epson,vdet-disable;
 		trickle-diode-disable;
+		status = "okay";
 	};
 
 	i2c_switch: pca9646pw@75 {
@@ -661,7 +699,7 @@
 		compatible = "nxp,pca9646";
 		reg = <0x75>;
 
-		i2c0@0 {
+		i2c_sw1: i2c0@0 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <0>;
@@ -991,6 +1029,11 @@
 				<&clk IMX8QXP_AUD_ACM_AUD_REC_CLK0_DIV>,
 				<&clk IMX8QXP_AUD_MCLKOUT0>;
 		assigned-clock-rates = <786432000>, <49152000>, <12288000>, <12288000>;
+	};
+
+	i2c_gp_1: 24c32@50 {
+		compatible = "fsl,24c32";
+		reg = <0x50>;
 	};
 
 	eeprom: 24c64@57 {
