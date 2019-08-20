@@ -192,9 +192,9 @@ struct mxc_hdmi *g_hdmi;
 
 static bool hdmi_inited;
 static bool hdcp_init;
-#ifndef CONFIG_ARCH_ADVANTECH
+//#ifndef CONFIG_ARCH_ADVANTECH
 static struct regulator *hdmi_regulator;
-#endif
+//#endif
 
 extern const struct fb_videomode mxc_cea_mode[64];
 extern void mxc_hdmi_cec_handle(u16 cec_stat);
