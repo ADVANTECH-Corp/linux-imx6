@@ -406,6 +406,7 @@
 				MX8MQ_IOMUXC_SD2_DATA1_USDHC2_DATA1		0xcd
 				MX8MQ_IOMUXC_SD2_DATA2_USDHC2_DATA2		0xcd
 				MX8MQ_IOMUXC_SD2_DATA3_USDHC2_DATA3		0xcd
+				MX8MQ_IOMUXC_GPIO1_IO04_USDHC2_VSELECT		0xc1
 			>;
 		};
 
@@ -417,6 +418,7 @@
 				MX8MQ_IOMUXC_SD2_DATA1_USDHC2_DATA1		0xdf
 				MX8MQ_IOMUXC_SD2_DATA2_USDHC2_DATA2		0xdf
 				MX8MQ_IOMUXC_SD2_DATA3_USDHC2_DATA3		0xdf
+				MX8MQ_IOMUXC_GPIO1_IO04_USDHC2_VSELECT		0xc1
 			>;
 		};
 
@@ -783,7 +785,8 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart3>;
 	assigned-clocks = <&clk IMX8MQ_CLK_UART3>;
-	assigned-clock-parents = <&clk IMX8MQ_SYS1_PLL_80M>;
+	assigned-clock-parents = <&clk IMX8MQ_CLK_25M>;
+	//assigned-clock-parents = <&clk IMX8MQ_SYS1_PLL_80M>;
 	fsl,uart-has-rtscts;
 	status = "okay";
 };
@@ -836,8 +839,10 @@
 };
 
 &usdhc2 {
-	pinctrl-names = "default";
+	pinctrl-names = "default", "state_100mhz", "state_200mhz";
 	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
+	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
+	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
 	bus-width = <4>;
 	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
 	wp-gpios = <&gpio2 20 GPIO_ACTIVE_HIGH>;
