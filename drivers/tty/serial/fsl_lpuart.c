@@ -1222,7 +1222,7 @@ static int lpuart_config_rs485(struct uart_port *port,
 #ifdef CONFIG_ARCH_ADVANTECH
 	unsigned long modem;
 
-	dev_info(sport->port.dev, "[Test] lpuart_config_rs485+: UARTMODIR = 0x%x\n", lpuart32_read(&sport->port, UARTMODIR));
+	dev_info(sport->port.dev, "[ADV] lpuart_config_rs485+: UARTMODIR = 0x%x\n", lpuart32_read(&sport->port, UARTMODIR));
 
 	modem = lpuart32_read(&sport->port, UARTMODIR) &
 				~(UARTMODIR_TXRTSPOL | UARTMODIR_TXRTSE | UARTMODIR_RXRTSE);
@@ -1273,7 +1273,7 @@ static int lpuart_config_rs485(struct uart_port *port,
 #ifdef CONFIG_ARCH_ADVANTECH
 	lpuart32_write(&sport->port, modem, UARTMODIR);
 
-	dev_info(sport->port.dev, "[Test] lpuart_config_rs485-: UARTMODIR = 0x%x\n", lpuart32_read(&sport->port, UARTMODIR));
+	dev_info(sport->port.dev, "[ADV] lpuart_config_rs485-: UARTMODIR = 0x%x\n", lpuart32_read(&sport->port, UARTMODIR));
 #else
 	writeb(modem, sport->port.membase + UARTMODEM);
 #endif
@@ -1282,7 +1282,7 @@ static int lpuart_config_rs485(struct uart_port *port,
 
 #ifdef CONFIG_ARCH_ADVANTECH
 /*
- * Handle TIOCSRS485 & TIOCSRS485 ioctl for RS-485 support
+ * Handle TIOCSRS485 & TIOCGRS485 ioctl for RS-485 support
  */
 static int lpuart_imx_ioctl(struct uart_port *port, unsigned int cmd, unsigned long arg)
 {
@@ -1379,23 +1379,6 @@ static void lpuart32_set_mctrl(struct uart_port *port, unsigned int mctrl)
 		temp &= ~UARTCTRL_LOOPS;
 
 	lpuart32_write(port, temp, UARTCTRL);
-
-#if CONFIG_ARCH_ADVANTECH
-	/* Make sure RXRTSE bit is not set when RS485 is enabled */
-	if (!(port->rs485.flags & SER_RS485_ENABLED)) {
-
-		temp = lpuart32_read(port, UARTMODIR) &
-			~(UARTMODIR_RXRTSE | UARTMODIR_TXCTSE);
-
-		if (mctrl & TIOCM_RTS)
-			temp |= UARTMODIR_RXRTSE;
-
-		if (mctrl & TIOCM_CTS)
-			temp |= UARTMODIR_TXCTSE;
-
-		lpuart32_write(port, temp, UARTMODIR);
-	}
-#endif
 }
 
 static void lpuart_break_ctl(struct uart_port *port, int break_state)
@@ -2095,6 +2078,19 @@ lpuart32_set_termios(struct uart_port *port, struct ktermios *termios,
 	lpuart32_write(&sport->port, modem, UARTMODIR);
 	lpuart32_write(&sport->port, ctrl, UARTCTRL);
 
+#ifdef CONFIG_ARCH_ADVANTECH
+	/* set auto RTS mode, when RS-485 is enabled */
+	if (sport->port.rs485.flags & SER_RS485_ENABLED) {
+		modem |= UARTMODEM_TXRTSE;
+
+		if (sport->port.rs485.flags & SER_RS485_RTS_ON_SEND)
+			modem &= ~UARTMODEM_TXRTSPOL;
+		else if (sport->port.rs485.flags & SER_RS485_RTS_AFTER_SEND)
+			modem |= UARTMODEM_TXRTSPOL;
+
+		lpuart32_write(&sport->port, modem, UARTMODIR);
+	}
+#endif
 	spin_unlock_irqrestore(&sport->port.lock, flags);
 
 	/* wait baud rate stable */
