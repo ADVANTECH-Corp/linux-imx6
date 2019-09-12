@@ -192,9 +192,9 @@ struct mxc_hdmi *g_hdmi;
 
 static bool hdmi_inited;
 static bool hdcp_init;
-#ifndef CONFIG_ARCH_ADVANTECH
+//#ifndef CONFIG_ARCH_ADVANTECH
 static struct regulator *hdmi_regulator;
-#endif
+//#endif
 
 extern const struct fb_videomode mxc_cea_mode[64];
 extern void mxc_hdmi_cec_handle(u16 cec_stat);
@@ -1204,7 +1204,7 @@ static int hdmi_phy_configure(struct mxc_hdmi *hdmi, unsigned char pRep,
 	}
 
 #ifdef CONFIG_ARCH_ADVANTECH
-	if ( IS_ROM_3420 || IS_ROM_5420 || IS_ROM_7421)
+	if ( IS_ROM_3420 || IS_ROM_5420 || IS_ROM_7421 || IS_RSB_4411)
 	{
 		if(hdmi->fbi->var.yres == 480)
 		{
@@ -1224,11 +1224,17 @@ static int hdmi_phy_configure(struct mxc_hdmi *hdmi, unsigned char pRep,
 		else
 		{
 			/* PLL/MPLL Cfg */
-			hdmi_phy_i2c_write(hdmi, 0x0AA0, 0x06);
+			if (IS_RSB_4411)
+				hdmi_phy_i2c_write(hdmi, 0x00A0, 0x06);
+			else
+				hdmi_phy_i2c_write(hdmi, 0x0AA0, 0x06);
 			/* PREEMP Cgf 0.00 */
 			hdmi_phy_i2c_write(hdmi, 0x800D, 0x09);  /* CKSYMTXCTRL */
 			/* TX/CK LVL 10 */
-			hdmi_phy_i2c_write(hdmi, 0x00C6, 0x0E);  /* VLEVCTRL */
+			if (IS_RSB_4411)
+				hdmi_phy_i2c_write(hdmi, 0x01CE, 0x0E);  /* VLEVCTRL */
+			else
+				hdmi_phy_i2c_write(hdmi, 0x00C6, 0x0E);  /* VLEVCTRL */
 			/* RESISTANCE TERM 133Ohm Cfg */
 			hdmi_phy_i2c_write(hdmi, 0x0004, 0x19);  /* TXTERM */
 		}
@@ -2859,19 +2865,23 @@ static int mxc_hdmi_probe(struct platform_device *pdev)
 	mxc_dispdrv_setdata(hdmi->disp_mxc_hdmi, hdmi);
 
 	platform_set_drvdata(pdev, hdmi);
-#ifndef CONFIG_ARCH_ADVANTECH
+
 	hdmi_regulator = devm_regulator_get(&pdev->dev, "HDMI");
 	if (!IS_ERR(hdmi_regulator)) {
+#ifndef CONFIG_ARCH_ADVANTECH
 		ret = regulator_enable(hdmi_regulator);
 		if (ret) {
 			dev_err(&pdev->dev, "enable 5v hdmi regulator failed\n");
 			goto edispdrv;
 		}
+#endif
 	} else {
+#ifndef CONFIG_ARCH_ADVANTECH
 		hdmi_regulator = NULL;
 		dev_warn(&pdev->dev, "No hdmi 5v supply\n");
-	}
 #endif
+	}
+
 	return 0;
 edispdrv:
 	iounmap(hdmi->gpr_base);
