@@ -21,6 +21,9 @@ extern char *strrchr(const char *, int);
 #define __FILENAME__ (strrchr("/" __FILE__, '/') + 1)
 #endif
 
+int lvds_powseq_param=0;
+int lvds_powseq_delay_ms[3]={210, 20, 20};
+
 static char lvds_panel[80]="";
 
 #define SCAN_PROGRESSIVE 0
@@ -122,7 +125,7 @@ processing_panel:
 			vm->vsync_len=pv->vm.vsync_len;
 			vm->pixelclock=pv->vm.pixelclock;
 			vm->flags=pv->vm.flags;
-			pr_info("%pOFP: %s - %lu,%u,%u,%u,%u,%u,%u,%u,%u,%x", np, display_panel,
+			pr_info("%pOFP: %s - %lu,%u,%u,%u,%u,%u,%u,%u,%u,%u", np, display_panel,
 				vm->pixelclock,
 				vm->hactive, vm->hfront_porch, vm->hback_porch, vm->hsync_len,
 				vm->vactive, vm->vfront_porch, vm->vback_porch, vm->vsync_len,
@@ -142,7 +145,7 @@ static u32 parse_flag_directives(char *directives)
 	u32 flags=0;
 	char str[128], *p=str, *pS;
 
-	strcpy(str, directives);
+	strncpy(str, directives,127);
 	str[strlen(str)]=FLAG_DELIM;
 	while (p && *p) {
 		int i, matched=0;
@@ -242,7 +245,21 @@ static int __init lvds_vmode_setup(char *options)
 	return 1;
 }
 
+static int __init lvds_powseq_delay_setup(char *options)
+{
+	int d1,d2,d3;
+
+	lvds_powseq_param=1;
+	sscanf(options,"%d,%d,%d",&d1, &d2, &d3);
+	if (d1 >=0 ) lvds_powseq_delay_ms[0]=d1;
+	if (d2 >=0 ) lvds_powseq_delay_ms[1]=d2;
+	if (d3 >=0 ) lvds_powseq_delay_ms[2]=d3;
+
+	return 1;
+}
+
 __setup("lvds_panel=", lvds_panel_setup);
 __setup("lvds_vmode=", lvds_vmode_setup);
+__setup("lvds_powseq_delay=", lvds_powseq_delay_setup);
 #endif
 
