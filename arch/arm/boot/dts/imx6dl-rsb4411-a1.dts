@@ -12,17 +12,21 @@
 
 /dts-v1/;
 
-#include "imx6q.dtsi"
+#include "imx6dl.dtsi"
 #include "imx6qdl-advantech.dtsi"
 
 / {
 	model = "Freescale i.MX6 Quad RSB4411 A1";
 	compatible = "fsl,imx6q-sabresd", "fsl,imx6q";
 
+	aliases {
+                i2c3; /* Disabled i2c3 in imx6dl.dtsi */
+        };
+
 	board {
 		compatible = "proc-board";
 		board-type = "RSB-4411 A1";
-		board-cpu = "DualQuad";
+		board-cpu = "DualLiteSolo";
 	};
 	
 	regulators {
@@ -91,10 +95,6 @@
 };
 
 &i2c1 {
-        pinctrl-names = "default", "gpio";
-        pinctrl-1 = <&pinctrl_i2c1_gpio>;
-        scl-gpios = <&gpio5 27 GPIO_ACTIVE_HIGH>;
-        sda-gpios = <&gpio5 26 GPIO_ACTIVE_HIGH>;
 
 	codec: sgtl5000@0a {
 		compatible = "fsl,sgtl5000";
@@ -325,14 +325,6 @@
                 };
         };
 
-        i2c1 {
-                pinctrl_i2c1_gpio: i2c1_gpio_grp {
-                        fsl,pins = <
-                                MX6QDL_PAD_CSI0_DAT8__GPIO5_IO26                0x1b0b0
-                                MX6QDL_PAD_CSI0_DAT9__GPIO5_IO27                0x1b0b0
-                        >;
-                };
-        };
 };
 
 &mipi_csi {
@@ -348,6 +340,18 @@
 };
 
 &ldb {
+        lvds-channel@0 {
+                crtc = "ipu1-di0";
+        };
+
+        lvds-channel@1 {
+		status ="disabled";
+        };
+};
+
+&hdmi_core {
+	ipu_id = <0>;
+	disp_id = <1>;
 	status = "okay";
 };
 
@@ -355,15 +359,7 @@
 	status = "okay";
 };
 
-&mxcfb2 {
-	status = "okay";
-};
-
 &mxcfb3 {
-	status = "okay";
-};
-
-&mxcfb4 {
 	status = "okay";
 };
 
@@ -410,10 +406,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart5_2>;
 	status = "okay";
-};
-
-&sata {
-        status = "okay";
 };
 
 &usbh1 {
