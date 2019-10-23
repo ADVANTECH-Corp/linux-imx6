@@ -34,7 +34,9 @@
 #	define LVDS_PANEL_G150XGEL04 "G150XGEL04"
 #	define LVDS_PANEL_G215HVN0   "G215HVN0"
 
+#ifndef DISPLAY_MODE
 #define DISPLAY_MODE HDMI_ONLY
+#endif
 
 #if DISPLAY_MODE == LVDS_CH0_ONLY
 #	undef  HDMI_DISPLAY
@@ -260,7 +262,7 @@
 	/*
 	lvds_backlight0: lvds_backlight@0 {
 		compatible = "pwm-backlight";
-		pwms = <&lvds0_pwm 0 100000 0>;
+		pwms = <&lvds0_pwm 0 5000000>;
 
 		brightness-levels = < 0  1  2  3  4  5  6  7  8  9
 				     10 11 12 13 14 15 16 17 18 19
@@ -278,7 +280,7 @@
 	*/
 	lvds_backlight1: lvds_backlight@1 {
 		compatible = "pwm-backlight";
-		pwms = <&lvds1_pwm 0 100000 0>;
+		pwms = <&lvds1_pwm 0 5000000>;
 
 		brightness-levels = < 0  1  2  3  4  5  6  7  8  9
 				     10 11 12 13 14 15 16 17 18 19
@@ -772,6 +774,13 @@
                 SC_P_LVDS1_GPIO01_LSIO_GPIO1_IO11	0x00000041
 			>;
 		};
+
+		pinctrl_tpm: tpm_grp {
+			fsl,pins = <
+				SC_P_ENET1_RGMII_RXD2_LSIO_GPIO6_IO20	0x06000021	/* TPM_RESET */
+				SC_P_ENET1_RGMII_RXD3_LSIO_GPIO6_IO21	0x06000021	/* TPM_IRQ */
+			>;
+		};
 	};
 };
 
@@ -1032,6 +1041,16 @@
 		assigned-clock-rates = <786432000>, <49152000>, <12288000>, <12288000>;
 	};
 #	endif
+
+	tpm: st33htph@2e {
+		compatible = "st,st33htpm-i2c";
+		reg= <0x2e>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_tpm>;
+		interrupt-parent = <&gpio6>;
+		interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;
+		status = "disabled";
+	};
 };
 #endif
 
