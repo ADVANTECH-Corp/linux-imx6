@@ -54,7 +54,8 @@ static int fb_notifier_callback(struct notifier_block *self,
 #if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
 	if (blank_count == 0)
 		blank_count++;
-#else
+#endif
+#if defined(CONFIG_ANDROID)
 	/* If we aren't interested in this event, skip it immediately ... */
 	if (event != FB_EVENT_BLANK && event != FB_EVENT_CONBLANK)
 		return 0;
@@ -64,6 +65,10 @@ static int fb_notifier_callback(struct notifier_block *self,
 	if (bd->ops)
 		if (!bd->ops->check_fb ||
 		    bd->ops->check_fb(bd, evdata->info)) {
+#if defined(CONFIG_OF) && defined(CONFIG_ARCH_ADVANTECH)
+			if (evdata->data == NULL)
+				return 0;
+#endif
 			fb_blank = *(int *)evdata->data;
 			if (fb_blank == FB_BLANK_UNBLANK &&
 			    !bd->fb_bl_on[node]) {
