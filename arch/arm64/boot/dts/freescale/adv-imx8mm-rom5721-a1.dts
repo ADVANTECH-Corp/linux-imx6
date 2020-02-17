@@ -13,12 +13,12 @@
  */
 
 /dts-v1/;
-/* #define PANEL_21 */
-#define PANEL_7 
 #define	OV5640
 #define	DSI_BRIDGE
 #define	DSI2HDMI
 /* #define	DSI2LVDS */
+/* #define PANEL_21 */
+/* #define PANEL_7 */
 /* #define	DSI2DP */
 #include "fsl-imx8mm.dtsi"
 #include <dt-bindings/display/drm_mipi_dsi.h>
@@ -134,8 +134,17 @@
         };
 
 #ifdef DSI2DP
+	clocks {
+			osc_27m: clock@6 {
+	                compatible = "fixed-clock";
+	                reg = <7>;
+	                #clock-cells = <0>;
+	                clock-frequency= <27000000>;
+	                clock-output-names = "osc_27m";
+	        };
+	};
 	panel: edp_panel {
-			compatible ="lg,lp079qx1-sp0v", "simple-panel";
+			compatible ="std,1080p", "simple-panel";
                         status = "okay";
                         #address-cells = <1>;
                         #size-cells = <0>;
@@ -146,25 +155,8 @@
                                 };
                         };
 
-
                 };
 
-/*
-        edp_panel: edp-panel {
-                compatible ="lg,lp079qx1-sp0v", "simple-panel";
-           //     backlight = <&backlight>;
-           //     enable-gpios = <&gpio4 RK_PC6 GPIO_ACTIVE_HIGH>;
-           //     pinctrl-names = "default";
-           //     pinctrl-0 = <&lcd_panel_reset>;
-           //     power-supply = <&vcc3v3_s0>;
-
-                ports {
-                        sn65dsi86_out: endpoint {
-                                remote-endpoint = <&edp_out_panel>;
-                        };
-                };
-        };
-*/
 #endif
 };
 
@@ -820,14 +812,14 @@
                 reg = <0x29>;
         };
 #ifdef DSI2DP
-        sn65di86@2d {
+        sn65dsi86@2d {
 		compatible = "ti,sn65dsi86";
                 reg = <0x2d>;
-		adi,dsi-lanes = <4>;
+//		adi,dsi-lanes = <4>;
 		#address-cells = <1>;
 		#size-cells = <0>;
 		clock-names = "refclk";
-		clocks = <&osc_24m>;
+		clocks = <&osc_27m>;
 
                 status = "okay";
 		ports {
@@ -1040,6 +1032,16 @@
                 clock-names = "mclk";
                 pinctrl-names = "default";
                 pinctrl-0 = <&pinctrl_sai1_mclk>;
+        };
+
+	24c32@57 {				//DB5901-U19
+                compatible = "fsl,24c32";
+                reg = <0x57>;
+        };
+
+	24c32@50 {				//DB5901-I2C_GP_1
+                compatible = "fsl,24c32";
+                reg = <0x50>;
         };
 
 	24c32@57 {				//DB5901-U19
@@ -1439,14 +1441,6 @@
         status = "okay";
         pinctrl-names = "default";
         pinctrl-0 = <&pinctrl_pwm4>;
-};
-
-&cpu_alert0 {
-	temperature = <105000>;
-};
-
-&cpu_crit0 {
-	temperature = <120000>;
 };
 
 #ifdef DSI2LVDS
