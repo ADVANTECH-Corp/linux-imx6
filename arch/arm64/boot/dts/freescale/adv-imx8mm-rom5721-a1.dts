@@ -160,6 +160,12 @@
 
 #endif
 };
+
+&clk {
+        assigned-clocks = <&clk IMX8MM_AUDIO_PLL1>, <&clk IMX8MM_AUDIO_PLL2>;
+        assigned-clock-rates = <786432000>, <722534400>;
+};
+
 &iomuxc {
 	pinctrl-names = "default";
 
@@ -1026,6 +1032,10 @@
                 clock-names = "mclk";
                 pinctrl-names = "default";
                 pinctrl-0 = <&pinctrl_sai1_mclk>;
+		assigned-clocks = <&clk IMX8MM_CLK_SAI1_SRC>,
+				<&clk IMX8MM_CLK_SAI1_DIV>;
+		assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
+		assigned-clock-rates = <0>, <24576000>;
 
         };
 
@@ -1191,9 +1201,6 @@
 &sai1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sai1>;
-	assigned-clocks = <&clk IMX8MM_CLK_SAI3_SRC>;
-	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
-	assigned-clock-rates = <24576000>;
 	status = "okay";
 };
 
