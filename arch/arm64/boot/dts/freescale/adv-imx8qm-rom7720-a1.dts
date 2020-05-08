@@ -1691,6 +1691,7 @@
 				SC_P_ENET1_RGMII_TX_CTL_LSIO_GPIO6_IO11	0x00000021	/* GPIO5 */
 				SC_P_ENET1_RGMII_TXD0_LSIO_GPIO6_IO12	0x00000021	/* GPIO6 */
 				SC_P_ENET1_RGMII_TXD1_LSIO_GPIO6_IO13	0x00000021	/* GPIO7 */
+				SC_P_FLEXCAN1_TX_LSIO_GPIO4_IO00		0x00000021	/* WDOUT */
 			>;
 		};
 
@@ -1744,12 +1745,6 @@
 				SC_P_MIPI_CSI1_MCLK_OUT_MIPI_CSI1_ACM_MCLK_OUT	0xC0000041
 				SC_P_MIPI_CSI1_GPIO0_00_LSIO_GPIO1_IO30         0x00000021
 				SC_P_MIPI_CSI1_GPIO0_01_LSIO_GPIO1_IO31         0x00000021
-			>;
-		};
-
-		pinctrl_wdt_ping_led: wdt_ping_led_grp {
-			fsl,pins = <
-				SC_P_FLEXCAN1_TX_LSIO_GPIO4_IO00	0x06000021	/* WDOUT */
 			>;
 		};
 	};
@@ -1825,7 +1820,3 @@
 #endif
 #endif
 
-&wdog {
-	pinctrl-0 = <&pinctrl_wdt_ping_led>;
-	wdt-ping-led = <&gpio4 0 0>;
-};
