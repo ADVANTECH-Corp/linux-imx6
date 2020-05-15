@@ -58,6 +58,14 @@
 		compatible = "gpio-set-direction";
 		usb-host-pwr-en = <&gpio1 19 1>; /* MINICARD_PWR_EN */
 	};
+
+	rtl8367 {
+		compatible = "realtek,rtl8367b";
+		pinctrl-names = "default";
+		gpio-sda = <&gpio5 5  GPIO_ACTIVE_HIGH>;
+		gpio-sck = <&gpio4 31 GPIO_ACTIVE_HIGH>;
+		realtek,extif0 = <1 0 1 1 1 1 1 1 2>;
+	};
 };
 
 &audio_sgtl5000 {
@@ -115,6 +123,13 @@
 &i2c2 {
 	hdmi: edid@50 {
 		compatible = "fsl,imx6-hdmi-i2c";
+		reg = <0x50>;
+	};
+};
+
+&i2c3 {
+	24c02@50 {
+		compatible = "fsl,24c02";
 		reg = <0x50>;
 	};
 };
