@@ -46,7 +46,10 @@
                 #size-cells = <0>;
                 clock-names = "refclk";
                 clocks = <&osc_27m>;
-
+                pinctrl-names = "default";
+                pinctrl-0 = <&pinctrl_dsi2dp_irq>;
+                interrupt-parent = <&gpio1>;
+                interrupts = <0 IRQ_TYPE_LEVEL_HIGH>;
                 status = "okay";
                 ports {
                         #address-cells = <1>;
