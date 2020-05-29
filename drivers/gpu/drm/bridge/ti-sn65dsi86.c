@@ -73,6 +73,11 @@
 #define  AUX_IRQ_STATUS_AUX_RPLY_TOUT		BIT(3)
 #define  AUX_IRQ_STATUS_AUX_SHORT		BIT(5)
 #define  AUX_IRQ_STATUS_NAT_I2C_FAIL		BIT(6)
+#define	SN_IRQ_EN_REG					0xE0
+#define	SN_HPD_ENABLE_REG				0xE6
+#define	SN_IRQ_HPD_REG					0xF5
+#define  HPD_INSERTION						BIT(1)
+#define  HPD_REMOVAL						BIT(2)
 
 #define MIN_DSI_CLK_FREQ_MHZ	40
 
@@ -85,19 +90,22 @@
 
 #define SN_REGULATOR_SUPPLY_NUM		4
 
-struct ti_sn_bridge {
-	struct device			*dev;
-	struct regmap			*regmap;
-	struct drm_dp_aux		aux;
-	struct drm_bridge		bridge;
-	struct drm_connector		connector;
-	struct dentry			*debugfs;
-	struct device_node		*host_node;
-	struct mipi_dsi_device		*dsi;
-	struct clk			*refclk;
-	struct drm_panel		*panel;
-	struct gpio_desc		*enable_gpio;
-	struct regulator_bulk_data	supplies[SN_REGULATOR_SUPPLY_NUM];
+struct ti_sn_bridge
+{
+	struct device *dev;
+	struct regmap *regmap;
+	struct drm_dp_aux aux;
+	struct drm_bridge bridge;
+	struct drm_connector connector;
+	struct dentry *debugfs;
+	struct device_node *host_node;
+	struct mipi_dsi_device *dsi;
+	struct clk *refclk;
+	struct drm_panel *panel;
+	struct gpio_desc *enable_gpio;
+	struct i2c_client *i2c_client;
+	struct regulator_bulk_data supplies[SN_REGULATOR_SUPPLY_NUM];
+	int first_detect;
 };
 
 static const struct regmap_range ti_sn_bridge_volatile_ranges[] = {
@@ -465,6 +473,7 @@ static void ti_sn_bridge_enable(struct drm_bridge *bridge)
 	unsigned int val;
 	int ret;
 
+	pdata->first_detect++;
 	/* DSI_A lane config */
 	val = CHA_DSI_LANES(4 - pdata->dsi->lanes);
 	regmap_update_bits(pdata->regmap, SN_DSI_LANES_REG,
@@ -561,8 +570,8 @@ static void ti_sn_bridge_pre_enable(struct drm_bridge *bridge)
 	 * change this to be conditional on someone specifying that HPD should
 	 * be used.
 	 */
-	regmap_update_bits(pdata->regmap, SN_HPD_DISABLE_REG, HPD_DISABLE,
-			   HPD_DISABLE);
+/*  	regmap_update_bits(pdata->regmap, SN_HPD_DISABLE_REG, HPD_DISABLE,
+			   HPD_DISABLE);  */
 
 	drm_panel_prepare(pdata->panel);
 }
@@ -675,9 +684,37 @@ static int ti_sn_bridge_parse_dsi_host(struct ti_sn_bridge *pdata)
 	return 0;
 }
 
+static irqreturn_t sn65dsi86_irq_handler(int irq, void *dev_id)
+{
+	struct ti_sn_bridge *pdata = dev_id;
+	unsigned int val;
+	regmap_read(pdata->regmap, SN_IRQ_HPD_REG, &val);
+
+	if (pdata->first_detect > 0)
+	{
+		if ((val & HPD_REMOVAL)) //If SN_IRQ_HPD_REG is 0X04
+			printk("%s: DP cable remove\n", "sn65dsi86");
+
+		if ((val & HPD_INSERTION)) //If SN_IRQ_HPD_REG is 0X02 , Re-enable bridge
+		{
+			printk("%s: DP cable plug-in\n", "sn65dsi86");
+			ti_sn_bridge_enable(&pdata->bridge);
+		}
+		pdata->first_detect = 1;
+	}
+	else
+	{
+		printk("%s: First Plug-in detect skip\n", "sn65dsi86");
+		pdata->first_detect++;
+	}
+	regmap_write(pdata->regmap, SN_IRQ_HPD_REG, 0xFF); //Write 0xFF to SN_IRQ_HPD_REG to clear
+	return IRQ_HANDLED;
+}
+
 static int ti_sn_bridge_probe(struct i2c_client *client,
 			      const struct i2c_device_id *id)
 {
+	unsigned int val;
 	struct ti_sn_bridge *pdata;
 	int ret;
 	
@@ -697,7 +734,7 @@ static int ti_sn_bridge_probe(struct i2c_client *client,
 		DRM_ERROR("regmap i2c init failed\n");
 		return PTR_ERR(pdata->regmap);
 	}
-
+	pdata->i2c_client = client;
 	pdata->dev = &client->dev;
 
 	ret = drm_of_find_panel_or_bridge(pdata->dev->of_node, 1, 0,
@@ -751,7 +788,25 @@ static int ti_sn_bridge_probe(struct i2c_client *client,
 	pdata->bridge.of_node = client->dev.of_node;
 
 	drm_bridge_add(&pdata->bridge);
+	if (pdata->i2c_client->irq)
+	{
+		pdata->first_detect = 0;
+		ret = devm_request_threaded_irq(&client->dev,
+										client->irq,
+										NULL, sn65dsi86_irq_handler,
+										IRQF_TRIGGER_RISING | IRQF_ONESHOT,
+										"sn65dsi86", pdata);
+		if (ret)
+			printk("%s: Unable to request irq: %d for use\n", __func__, client->irq);
 
+		regmap_write(pdata->regmap, SN_IRQ_EN_REG, 1);
+		regmap_read(pdata->regmap, SN_IRQ_EN_REG, &val);
+		regmap_write(pdata->regmap, SN_HPD_ENABLE_REG, 0x07);
+		regmap_read(pdata->regmap, SN_HPD_ENABLE_REG, &val);
+		regmap_read(pdata->regmap, SN_IRQ_HPD_REG, &val);
+	}
+	else
+		printk("%s: Without setting irq \n", __func__);
 	return 0;
 }
 

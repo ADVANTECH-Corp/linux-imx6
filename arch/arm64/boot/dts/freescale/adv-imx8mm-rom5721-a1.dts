@@ -560,12 +560,16 @@
 
                 pinctrl_wlan: wlangrp {
                         fsl,pins = <
-                                MX8MM_IOMUXC_GPIO1_IO00_ANAMIX_REF_CLK_32K      0x141	/* REF_CLK_32K */
                                 MX8MM_IOMUXC_SD1_DATA7_GPIO2_IO9                0x111	/* WL_WAKE_HOST */
 				MX8MM_IOMUXC_SD1_DATA6_GPIO2_IO8		0x111	/* BT_WAKE_HOST */
 				MX8MM_IOMUXC_SAI5_RXC_GPIO3_IO20		0x19	/* WL_PRESENT */
                         >;
                 };
+		pinctrl_dsi2dp_irq: dsi2dpgrp {
+						fsl,pins = <
+								MX8MM_IOMUXC_GPIO1_IO00_GPIO1_IO0         0x159	/* DSI2DP IRQ */
+						>;
+				};
 
 		pinctrl_pwm2: pwm2grp {
                         fsl,pins = <
