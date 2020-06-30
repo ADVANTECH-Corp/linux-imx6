@@ -18,6 +18,7 @@
 /* Definitions */
 #define ROM_DB5901
 #define SDHC_LOW_SPEED_ONLY
+#define ROM_DB5901_I2S_CN3
 
 /* LVDS Panel : only choose one!
  *   LVDS_AUO_7, LVDS_CHIMEI_15, LVDS_AUO_215
@@ -118,7 +119,11 @@
 	sound: sound {
 		compatible = "fsl,imx-audio-sgtl5000";
 		model = "sgtl50000";
+#ifdef ROM_DB5901_I2S_CN3
 		ssi-controller = <&sai1>;
+#else
+		ssi-controller = <&sai0>;
+#endif
 		audio-codec = <&codec>;
 		no-audmux;
 		audio-routing =
@@ -801,7 +806,7 @@
 			<&clk IMX8QXP_AUD_ACM_AUD_PLL_CLK0_DIV>,
 			<&clk IMX8QXP_AUD_ACM_AUD_REC_CLK0_DIV>,
 			<&clk IMX8QXP_AUD_SAI_0_MCLK>;
-	assigned-clock-rates = <786432000>, <49152000>, <12288000>, <49152000>;
+	assigned-clock-rates = <786432000>, <49152000>, <24000000>, <49152000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sai0>;
 	status = "okay";
@@ -812,7 +817,7 @@
 			<&clk IMX8QXP_AUD_ACM_AUD_PLL_CLK0_DIV>,
 			<&clk IMX8QXP_AUD_ACM_AUD_REC_CLK0_DIV>,
 			<&clk IMX8QXP_AUD_SAI_1_MCLK>;
-	assigned-clock-rates = <786432000>, <49152000>, <12288000>, <49152000>;
+	assigned-clock-rates = <786432000>, <49152000>, <24000000>, <49152000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sai1>;
 	status = "okay";
@@ -1195,7 +1200,7 @@
 				<&clk IMX8QXP_AUD_ACM_AUD_PLL_CLK0_DIV>,
 				<&clk IMX8QXP_AUD_ACM_AUD_REC_CLK0_DIV>,
 				<&clk IMX8QXP_AUD_MCLKOUT0>;
-		assigned-clock-rates = <786432000>, <49152000>, <12288000>, <12288000>;
+		assigned-clock-rates = <786432000>, <49152000>, <24000000>, <24000000>;
 	};
 
 	i2c_gp_1: 24c32@50 {
