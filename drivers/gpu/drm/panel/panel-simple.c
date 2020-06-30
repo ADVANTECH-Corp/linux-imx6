@@ -512,9 +512,12 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 
 	panel->enabled = false;
 	panel->prepared = false;
+#ifdef CONFIG_ARCH_ADVANTECH
 	panel->desc = of_desc;
 	panel->dev = dev;
-
+#else
+	panel->desc = desc
+#endif
 	panel->supply = devm_regulator_get(dev, "power");
 	if (IS_ERR(panel->supply))
 		return PTR_ERR(panel->supply);
