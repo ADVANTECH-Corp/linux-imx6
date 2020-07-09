@@ -70,7 +70,14 @@ static int fb_notifier_callback(struct notifier_block *self,
 				return 0;
 			}
 #endif
+#if defined(CONFIG_ANDROID)
+			if(event == FB_EVENT_FB_REGISTERED)
+				fb_blank = 0;
+			else
+				fb_blank = *(int *)evdata->data;
+#else
 			fb_blank = *(int *)evdata->data;
+#endif
 			if (fb_blank == FB_BLANK_UNBLANK &&
 			    !bd->fb_bl_on[node]) {
 				bd->fb_bl_on[node] = true;
