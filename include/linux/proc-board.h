@@ -46,5 +46,8 @@ extern char board_cpu[20];
 #define IS_EBC_RM01     ( strncmp(board_type,"EBC-RM01", 8)==0 ? 1 : 0)
 #define IS_EBC_RM01_A1  ( strncmp(board_type,"EBC-RM01 A1", 11)==0 ? 1 : 0)
 
+#define IS_EBC_RB02     ( strncmp(board_type,"EBC-RB02", 8)==0 ? 1 : 0)
+#define IS_EBC_RB02_A1  ( strncmp(board_type,"EBC-RB02 A1", 11)==0 ? 1 : 0)
+
 #endif /* _LINUX_PROC_BOARD_H */
 #endif /* CONFIG_ARCH_ADVANTECH */

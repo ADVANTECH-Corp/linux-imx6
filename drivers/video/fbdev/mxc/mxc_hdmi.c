@@ -1201,7 +1201,7 @@ static int hdmi_phy_configure(struct mxc_hdmi *hdmi, unsigned char pRep,
 	}
 
 #ifdef CONFIG_ARCH_ADVANTECH
-	if ( IS_ROM_3420 || IS_ROM_5420 || IS_ROM_7421 || IS_RSB_4411)
+	if ( IS_ROM_3420 || IS_ROM_5420 || IS_ROM_7421 || IS_RSB_4411 || IS_EBC_RB02)
 	{
 		if(hdmi->fbi->var.yres == 480)
 		{
@@ -1221,14 +1221,14 @@ static int hdmi_phy_configure(struct mxc_hdmi *hdmi, unsigned char pRep,
 		else
 		{
 			/* PLL/MPLL Cfg */
-			if (IS_RSB_4411)
+			if (IS_RSB_4411 || IS_EBC_RB02)
 				hdmi_phy_i2c_write(hdmi, 0x00A0, 0x06);
 			else
 				hdmi_phy_i2c_write(hdmi, 0x0AA0, 0x06);
 			/* PREEMP Cgf 0.00 */
 			hdmi_phy_i2c_write(hdmi, 0x800D, 0x09);  /* CKSYMTXCTRL */
 			/* TX/CK LVL 10 */
-			if (IS_RSB_4411)
+			if (IS_RSB_4411 || IS_EBC_RB02)
 				hdmi_phy_i2c_write(hdmi, 0x01CE, 0x0E);  /* VLEVCTRL */
 			else
 				hdmi_phy_i2c_write(hdmi, 0x00C6, 0x0E);  /* VLEVCTRL */

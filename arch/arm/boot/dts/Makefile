@@ -452,7 +452,8 @@ dtb-$(CONFIG_ARCH_ADVANTECH) += \
 	imx6q-ebcrb01-a1.dtb \
 	imx6dl-ebcrs03-a1.dtb \
 	imx6q-ebcrs03-a1.dtb \
-	imx7d-ebcrm01-a1.dtb
+	imx7d-ebcrm01-a1.dtb \
+	imx6q-ebcrb02-a1.dtb
 dtb-$(CONFIG_SOC_LS1021A) += \
 	ls1021a-qds.dtb \
 	ls1021a-twr.dtb
