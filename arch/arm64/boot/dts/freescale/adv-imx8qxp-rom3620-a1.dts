@@ -776,11 +776,6 @@
 		compatible = "fsl,24c32";
 		reg = <0x57>;
 	};
-
-	eeprom2: 24c64@50 {
-		compatible = "st,24c64";
-		reg = <0x50>;
-	};
 #endif
 };
 
@@ -834,6 +829,13 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_lpi2c3>;
 	status = "okay";
+
+#ifdef ROM_DB3900
+	eeprom3: 24c64@50 {
+		compatible = "st,24c64";
+		reg = <0x50>;
+	};
+#endif
 };
 
 &sai0 {
@@ -1097,6 +1099,13 @@
 	pinctrl-0 = <&pinctrl_i2c0_mipi_lvds0>;
 	clock-frequency = <100000>;
 	status = "okay";
+
+#ifdef ROM_DB3900
+	eeprom2: 24c64@50 {
+		compatible = "st,24c64";
+		reg = <0x50>;
+	};
+#endif
 };
 
 &ldb1_phy {
@@ -1226,11 +1235,6 @@
 				<&clk IMX8QXP_AUD_ACM_AUD_REC_CLK0_DIV>,
 				<&clk IMX8QXP_AUD_MCLKOUT0>;
 		assigned-clock-rates = <786432000>, <49152000>, <24000000>, <24000000>;
-	};
-
-	eeprom3: 24c64@50 {
-		compatible = "st,24c64";
-		reg = <0x50>;
 	};
 #endif
 };
