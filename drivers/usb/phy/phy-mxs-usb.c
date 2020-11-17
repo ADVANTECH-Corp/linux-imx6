@@ -431,6 +431,9 @@ static int mxs_phy_hw_init(struct mxs_phy *mxs_phy)
 			mxs_phy_tx_init(mxs_phy);
 		}
 	}
+	else {
+		mxs_phy_tx_init(mxs_phy);
+	}
 #else
 	mxs_phy_tx_init(mxs_phy);
 #endif
