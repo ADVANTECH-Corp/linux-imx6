@@ -129,6 +129,7 @@ dtb-$(CONFIG_ARCH_ADVANTECH) += adv-imx8mq-rom5720-a1.dtb \
 				adv-imx8mq-rom5720-a1-lcdif-adv7535.dtb \
 				adv-imx8mq-rom5720-a1-dual-display.dtb \
 				adv-imx8mq-rom5720-a1-m2-sdio.dtb \
+				adv-imx8mq-rom5720-a1-m2-i2s.dtb \
 				adv-imx8mq-rom5720-a1-otg.dtb \
 				adv-imx8qm-rom7720-a1.dtb \
 				adv-imx8qm-rom7720-a1_lvds0.dtb \
