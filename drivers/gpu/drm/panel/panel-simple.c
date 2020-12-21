@@ -2653,8 +2653,7 @@ static const struct panel_desc_dsi auo_g101uan02 = {
     },
     .flags = MIPI_DSI_MODE_VIDEO |
              MIPI_DSI_MODE_VIDEO_BURST |
-             MIPI_DSI_MODE_VIDEO_SYNC_PULSE |
-             MIPI_DSI_MODE_EOT_PACKET,
+             MIPI_DSI_CLOCK_NON_CONTINUOUS,
     .format = MIPI_DSI_FMT_RGB888,
     .lanes = 4,
 };
