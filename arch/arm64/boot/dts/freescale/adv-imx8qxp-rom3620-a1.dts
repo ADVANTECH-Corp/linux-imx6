@@ -194,6 +194,13 @@
 			linux,input-type = <EV_PWR>; //EV_KEY 1, EV_PWR 22
 			linux,code = <KEY_SUSPEND>; //KEY_SUSPEND 205, KEY_POWER 116
 		};
+
+		emergy@2 {
+			label = "EMERGY KEY";
+			gpios = <&gpio3 23 GPIO_ACTIVE_LOW>;
+			linux,input-type = <EV_KEY>;
+			linux,code = <KEY_SAVE>;
+		};
 	};
 };
 
@@ -223,6 +230,7 @@
 		pinctrl_gpio_keys: gpio_keys_grp{
 			fsl,pins = <
 				SC_P_MIPI_DSI0_GPIO0_01_LSIO_GPIO1_IO28		0x00000021 /* SLEEP# */
+				SC_P_QSPI0B_SS0_B_LSIO_GPIO3_IO23		0x00000021 /* EMERGY# */
 			>;
 		};
 
@@ -230,7 +238,7 @@
 			fsl,pins = <
 				SC_P_QSPI0B_DATA0_LSIO_GPIO3_IO18	0x06000021	/* GPIO0 */
 				SC_P_QSPI0B_DQS_LSIO_GPIO3_IO22	0x06000021	/* GPIO1 */
-				SC_P_QSPI0B_SS1_B_LSIO_GPIO3_IO24	0x06000021	/* GPIO2 */
+				SC_P_QSPI0B_DATA1_LSIO_GPIO3_IO19	0x06000021	/* GPIO2 */
 				SC_P_CSI_PCLK_LSIO_GPIO3_IO00	0x06000021	/* GPIO3 */
 				SC_P_SPI2_SCK_LSIO_GPIO1_IO03	0x06000021	/* GPIO4 */
 				SC_P_SPI2_CS0_LSIO_GPIO1_IO00	0x06000021	/* GPIO5 */
@@ -556,7 +564,7 @@
 
 		pinctrl_mipi_csi0: mipi_csi0grp {
 			fsl,pins = <
-				SC_P_QSPI0B_DATA1_LSIO_GPIO3_IO19	0x06000021	/* CAM1_PWR# */
+				SC_P_QSPI0B_SS1_B_LSIO_GPIO3_IO24	0x06000021	/* CAM1_PWR# */
 				SC_P_QSPI0B_DATA2_LSIO_GPIO3_IO20	0x06000021	/* CAM1_RST# */
 				SC_P_MIPI_CSI0_MCLK_OUT_MIPI_CSI0_ACM_MCLK_OUT	0x00000065
 			>;
@@ -583,10 +591,10 @@
 		pinctrl_ldb1: ldb1_grp {
 			fsl,pins = <
 #if defined(LVDS_SINGLE_0)
-				SC_P_QSPI0B_SS0_B_LSIO_GPIO3_IO23		0x00000041	/* LCD0_VDD_EN */
+				SC_P_QSPI0B_DATA3_LSIO_GPIO3_IO21		0x00000041	/* LCD0_VDD_EN */
 				SC_P_MIPI_CSI0_GPIO0_01_LSIO_GPIO3_IO07	0x00000041	/* LCD0_BKLT_EN */
 #else
-				SC_P_QSPI0B_SS0_B_LSIO_GPIO3_IO23		0x00000021	/* LCD0_VDD_EN */
+				SC_P_QSPI0B_DATA3_LSIO_GPIO3_IO21		0x00000021	/* LCD0_VDD_EN */
 				SC_P_MIPI_CSI0_GPIO0_01_LSIO_GPIO3_IO07	0x00000021	/* LCD0_BKLT_EN */
 #endif
 			>;
@@ -1043,7 +1051,7 @@
 		clocks = <&clk IMX8QXP_24MHZ>;
 		clock-names = "csi_mclk";
 		csi_id = <0>;
-		pwn-gpios = <&gpio3 19 GPIO_ACTIVE_LOW>;
+		pwn-gpios = <&gpio3 24 GPIO_ACTIVE_LOW>;
 		rst-gpios = <&gpio3 20 GPIO_ACTIVE_HIGH>;
 		mclk = <24000000>;
 		mclk_source = <0>;
@@ -1073,7 +1081,7 @@
 &lvds_backlight0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_ldb1>;
-	lvds-vcc-enable = <&gpio3 23 1>;
+	lvds-vcc-enable = <&gpio3 21 1>;
 	lvds-bkl-enable = <&gpio3 7 1>;
 #if defined(LVDS_SINGLE_0)
 	status = "okay";
