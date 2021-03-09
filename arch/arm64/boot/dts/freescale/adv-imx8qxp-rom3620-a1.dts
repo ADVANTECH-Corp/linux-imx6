@@ -543,9 +543,9 @@
 
 		pinctrl_pcieb: pcieagrp{
 			fsl,pins = <
-				SC_P_MIPI_DSI1_GPIO0_01_LSIO_GPIO2_IO00		0x06000021	/* PCIE0_PWR_EN */
+				SC_P_MIPI_DSI1_GPIO0_01_LSIO_GPIO2_IO00		0x06000061	/* PCIE0_PWR_EN */
 				SC_P_PCIE_CTRL0_CLKREQ_B_LSIO_GPIO4_IO01	0x06000021	/* RESET_OUT# */
-				SC_P_PCIE_CTRL0_PERST_B_LSIO_GPIO4_IO00		0x06000021	/* PCIE_RESET# */
+				SC_P_PCIE_CTRL0_PERST_B_LSIO_GPIO4_IO00		0x06000061	/* PCIE_RESET# */
 				SC_P_PCIE_CTRL0_WAKE_B_LSIO_GPIO4_IO02		0x04000021	/* PCIE_WAKE# */
 			>;
 		};
@@ -921,6 +921,7 @@
 	power-on-gpio = <&gpio2 0 GPIO_ACTIVE_LOW>;	/* PCIE0_PWR_EN */
 	reset-gpio = <&gpio4 0 GPIO_ACTIVE_LOW>;
 	epdev_on-supply = <&epdev_on>;
+	reset-time = <100>;
 	status = "okay";
 };
 
