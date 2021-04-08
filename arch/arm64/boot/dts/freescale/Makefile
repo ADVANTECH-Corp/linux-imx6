@@ -157,7 +157,8 @@ dtb-$(CONFIG_ARCH_ADVANTECH) += adv-imx8mq-rom5720-a1.dtb \
 				adv-imx8mm-rom5721-a1-dsi2dp.dts \
 				adv-imx8mm-rom5721-a1-auog101uan02.dtb \
 				adv-imx8mm-android-rom5721-a1-adv7535.dtb \
-				adv-imx8mm-android-rom5721-a1-auog101uan02.dtb
+				adv-imx8mm-android-rom5721-a1-auog101uan02.dtb \
+				adv-imx8mm-android-rom5721-a1-m101nwwb.dtb
 				
 always		:= $(dtb-y)
 subdir-y	:= $(dts-dirs)
