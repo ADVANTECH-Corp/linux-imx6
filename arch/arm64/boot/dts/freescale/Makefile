@@ -20,6 +20,8 @@ dtb-$(CONFIG_ARCH_FSL_IMX8QM) += fsl-imx8qm-lpddr4-arm2.dtb \
 				 fsl-imx8qm-lpddr4-arm2_ca53.dtb \
 				 fsl-imx8qm-lpddr4-arm2_ca72.dtb \
 				 fsl-imx8qm-mek.dtb \
+				 fsl-imx8qm-mek-car.dtb \
+				 fsl-imx8qm-mek-car2.dtb \
 				 fsl-imx8qm-mek-rpmsg.dtb \
 				 fsl-imx8qm-mek-dsp.dtb \
 				 fsl-imx8qm-mek-ov5640.dtb \
@@ -51,6 +53,8 @@ dtb-$(CONFIG_ARCH_FSL_IMX8QM) += fsl-imx8qm-lpddr4-arm2.dtb \
 				 fsl-imx8qm-lpddr4-arm2-dp-dig-pll.dtb
 dtb-$(CONFIG_ARCH_FSL_IMX8QXP) += fsl-imx8qxp-lpddr4-arm2.dtb \
 				  fsl-imx8qxp-mek.dtb \
+				  fsl-imx8qxp-mek-car.dtb \
+				  fsl-imx8qxp-mek-car2.dtb \
 				  fsl-imx8qxp-mek-rpmsg.dtb \
 				  fsl-imx8qxp-mek-dsp.dtb \
 				  fsl-imx8qxp-mek-dom0.dtb \
@@ -107,8 +111,10 @@ dtb-$(CONFIG_ARCH_FSL_IMX8MQ) += fsl-imx8mq-ddr3l-arm2.dtb \
 				 fsl-imx8mq-evk-root.dtb \
 				 fsl-imx8mq-evk-inmate.dtb \
 				 fsl-imx8mq-evk-dp.dtb \
-				 fsl-imx8mq-evk-edp.dtb
+				 fsl-imx8mq-evk-edp.dtb \
+				 fsl-imx8mq-phanbell.dtb
 dtb-$(CONFIG_ARCH_FSL_IMX8MM) += fsl-imx8mm-evk.dtb \
+				 fsl-imx8mm-evk-drm.dtb \
 				 fsl-imx8mm-evk-ak4497.dtb \
 				 fsl-imx8mm-evk-m4.dtb \
 				 fsl-imx8mm-evk-ak5558.dtb \
@@ -122,6 +128,7 @@ dtb-$(CONFIG_ARCH_FSL_IMX8MM) += fsl-imx8mm-evk.dtb \
 				 fsl-imx8mm-evk-revb.dtb \
 				 fsl-imx8mm-evk-revb-rm67191.dtb \
 				 fsl-imx8mm-ddr4-evk-rm67191.dtb \
+				 fsl-imx8mm-trusty-evk.dtb \
 				 fsl-imx8mm-ddr4-qca9377-evk.dtb
 dtb-$(CONFIG_ARCH_ADVANTECH) += adv-imx8mq-rom5720-a1.dtb \
 				adv-imx8mq-rom5720-a1-dcss-adv7535-b3.dtb \
@@ -129,7 +136,6 @@ dtb-$(CONFIG_ARCH_ADVANTECH) += adv-imx8mq-rom5720-a1.dtb \
 				adv-imx8mq-rom5720-a1-lcdif-adv7535.dtb \
 				adv-imx8mq-rom5720-a1-dual-display.dtb \
 				adv-imx8mq-rom5720-a1-m2-sdio.dtb \
-				adv-imx8mq-rom5720-a1-m2-i2s.dtb \
 				adv-imx8mq-rom5720-a1-otg.dtb \
 				adv-imx8qm-rom7720-a1.dtb \
 				adv-imx8qm-rom7720-a1_lvds0.dtb \
@@ -158,7 +164,8 @@ dtb-$(CONFIG_ARCH_ADVANTECH) += adv-imx8mq-rom5720-a1.dtb \
 				adv-imx8mm-rom5721-a1-auog101uan02.dtb \
 				adv-imx8mm-android-rom5721-a1-adv7535.dtb \
 				adv-imx8mm-android-rom5721-a1-auog101uan02.dtb \
-				adv-imx8mm-android-rom5721-a1-m101nwwb.dtb
+				adv-imx8mm-android-rom5721-a1-dsi2lvds-m101nwwb.dtb \
+				adv-imx8mm-android-rom5721-a1-dsi2lvds-g070vw01.dtb
 				
 always		:= $(dtb-y)
 subdir-y	:= $(dts-dirs)
