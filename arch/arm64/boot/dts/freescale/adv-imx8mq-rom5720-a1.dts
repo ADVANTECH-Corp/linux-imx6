@@ -1114,12 +1114,19 @@
         pinctrl-names = "default";
         pinctrl-0 = <&pinctrl_ecspi2>;
         status = "okay";
+#ifdef TEST
+        spidev@0 {
+                compatible = "rohm,dh2228fv";
+                spi-max-frequency = <52000000>;
+                reg = <0>;
+                };
 
+#endif
         flash: m25p80@0 {
                 #address-cells = <1>;
                 #size-cells = <0>;
                 compatible = "micron,n25qba16";
-                spi-max-frequency = <20000000>;
+                spi-max-frequency = <1000000>;
                 reg = <0>;
         };
 };
