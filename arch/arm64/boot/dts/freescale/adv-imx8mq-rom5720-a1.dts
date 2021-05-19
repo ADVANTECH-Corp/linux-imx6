@@ -792,7 +792,7 @@
 		assigned-clock-rates = <0>, <20000000>;                
                 csi_id = <0>;
                 pwn-gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;
-                rst-gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
+                rst-gpios = <&gpio4 29 GPIO_ACTIVE_LOW>;
 		mclk = <20000000>;
 		mclk_source = <0>;
                 port {
