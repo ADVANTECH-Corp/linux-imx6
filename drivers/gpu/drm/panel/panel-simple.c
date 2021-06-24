@@ -2665,6 +2665,9 @@ static const struct of_device_id dsi_of_match[] = {
 		.compatible = "toshiba,tc358775",
 		.data = NULL
 	}, {
+		.compatible = "simple-panel-dsi",
+		.data = NULL
+	}, {
 #endif
 		.compatible = "auo,b080uan01",
 		.data = &auo_b080uan01
