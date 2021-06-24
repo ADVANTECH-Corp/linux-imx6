@@ -313,6 +313,11 @@ static int fsl_sai_set_dai_sysclk(struct snd_soc_dai *cpu_dai,
 			return -EINVAL;
 		}
 
+#ifdef CONFIG_ARCH_ADVANTECH
+		if((!strcmp(__clk_get_name(sai->mclk_clk[clk_id]), "dummy")) && (clk_id != sai->index))
+			clk_id = sai->index;
+#endif
+
 		ret = fsl_sai_set_mclk_rate(cpu_dai, clk_id, freq);
 		if (ret < 0)
 			return ret;
@@ -1412,6 +1417,12 @@ static int fsl_sai_probe(struct platform_device *pdev)
 	sai->pll11k_clk = devm_clk_get(&pdev->dev, "pll11k");
 	if (IS_ERR(sai->pll11k_clk))
 		sai->pll11k_clk = NULL;
+
+#ifdef CONFIG_ARCH_ADVANTECH
+	index = of_alias_get_id(np, "sai");
+	if (index >= 0)
+		sai->index = index;
+#endif
 
 	if (of_find_property(np, "fsl,sai-multi-lane", NULL))
 		sai->is_multi_lane = true;

@@ -21,6 +21,13 @@
 #include "fsl-imx8mq.dtsi"
 
 / {
+	aliases {
+		sai0 = &sai1;
+		sai1 = &sai2;
+		sai2 = &sai3;
+		sai3 = &sai4;
+	};
+
 	firmware {
 		android {
 			compatible = "android,firmware";
