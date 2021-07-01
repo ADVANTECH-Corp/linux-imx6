@@ -542,6 +542,7 @@
 		pinctrl_lcd0: lcd0grp {
 			fsl,pins = <
 				MX8MQ_IOMUXC_ECSPI1_SCLK_GPIO5_IO6	0x19		/* LCD0_VDD_EN */
+				MX8MQ_IOMUXC_GPIO1_IO15_GPIO1_IO15	0x19		/* LCD0_BKLT_EN */
 				MX8MQ_IOMUXC_ECSPI1_MOSI_GPIO5_IO7	0x19		/* DSI0_TE */
 			>;
 		};

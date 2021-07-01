@@ -34,6 +34,10 @@
 #include <video/mipi_display.h>
 #include <video/videomode.h>
 
+#ifdef CONFIG_DRM_PANEL_AUO_G101UAN02
+extern void enable_lcd_vdd_en(void);
+extern void enable_ldb_bkl_pwm(void);
+#endif
 #define MIPI_FIFO_TIMEOUT msecs_to_jiffies(500)
 
 /* DSI HOST registers */
@@ -692,6 +696,12 @@ static int nwl_dsi_host_attach(struct mipi_dsi_host *host,
 
 	if (dsi->connector.dev)
 		drm_helper_hpd_irq_event(dsi->connector.dev);
+
+#ifdef CONFIG_DRM_PANEL_AUO_G101UAN02
+        enable_lcd_vdd_en();
+        msleep(950);
+        enable_ldb_bkl_pwm();
+#endif
 
 	return 0;
 }
