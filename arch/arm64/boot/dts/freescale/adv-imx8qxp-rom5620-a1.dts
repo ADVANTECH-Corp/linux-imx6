@@ -884,7 +884,7 @@
 	ext_osc = <1>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pcieb>;
-	disable-gpio = <&gpio_exp2 0 GPIO_ACTIVE_LOW>; /* W_DISABLE1# */
+	//disable-gpio = <&gpio_exp2 0 GPIO_ACTIVE_LOW>; /* W_DISABLE1# */
 	reset-gpio = <&gpio4 0 GPIO_ACTIVE_LOW>;
 	epdev_on-supply = <&epdev_on>;
 	status = "okay";
