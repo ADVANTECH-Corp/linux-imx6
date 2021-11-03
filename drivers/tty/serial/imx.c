@@ -42,6 +42,7 @@
 #include <linux/dma-mapping.h>
 #ifdef CONFIG_ARCH_ADVANTECH
 #include <linux/of_gpio.h>
+#include <linux/pm_qos.h>
 #endif
 #include <asm/irq.h>
 #include <linux/busfreq-imx.h>
@@ -252,6 +253,7 @@ struct imx_port {
 #ifdef CONFIG_ARCH_ADVANTECH
 	/* RS-485 fields */
 	struct serial_rs485	rs485;
+	struct pm_qos_request   pm_qos_req;
 #endif
 	unsigned int            saved_reg[10];
 	bool			context_saved;
@@ -403,15 +405,11 @@ static void imx_stop_tx(struct uart_port *port)
 	if (port->rs485.flags & SER_RS485_ENABLED &&
 	    readl(port->membase + USR2) & USR2_TXDC) {
 		temp = readl(port->membase + UCR2);
-#ifdef CONFIG_ARCH_ADVANTECH
-		temp &= ~UCR2_CTS;
-#else
 		if (port->rs485.flags & SER_RS485_RTS_AFTER_SEND)
 			imx_port_rts_active(sport, &temp);
 		else
 			imx_port_rts_inactive(sport, &temp);
 		temp |= UCR2_RXEN;
-#endif
 		writel(temp, port->membase + UCR2);
 
 		temp = readl(port->membase + UCR4);
@@ -621,25 +619,21 @@ static void imx_start_tx(struct uart_port *port)
 	struct imx_port *sport = (struct imx_port *)port;
 	unsigned long temp;
 
-        if (port->rs485.flags & SER_RS485_ENABLED) {
+	if (port->rs485.flags & SER_RS485_ENABLED) {
 		temp = readl(port->membase + UCR2);
-#ifndef CONFIG_ARCH_ADVANTECH
 		if (port->rs485.flags & SER_RS485_RTS_ON_SEND)
 			imx_port_rts_active(sport, &temp);
 		else
 			imx_port_rts_inactive(sport, &temp);
 		if (!(port->rs485.flags & SER_RS485_RX_DURING_TX))
 			temp &= ~UCR2_RXEN;
-#else
-		temp |= UCR2_CTS;
-#endif
 		writel(temp, port->membase + UCR2);
 
 		/* enable transmitter and shifter empty irq */
 		temp = readl(port->membase + UCR4);
 		temp |= UCR4_TCEN;
 		writel(temp, port->membase + UCR4);
-        }
+	}
 
 	if (!sport->dma_is_enabled) {
 		temp = readl(sport->port.membase + UCR1);
@@ -930,10 +924,6 @@ static void imx_set_mctrl(struct uart_port *port, unsigned int mctrl)
 		writel(temp, sport->port.membase + UCR2);
 	}
 
-#ifdef CONFIG_ARCH_ADVANTECH
-	else	return;
-#endif
-
 	temp = readl(sport->port.membase + UCR3) & ~UCR3_DSR;
 	if (!(mctrl & TIOCM_DTR))
 		temp |= UCR3_DSR;
@@ -1170,9 +1160,15 @@ static void imx_uart_dma_exit(struct imx_port *sport)
 		sport->dma_chan_tx = NULL;
 	}
 
+#ifndef CONFIG_ARCH_ADVANTECH	
 	if (sport->dma_is_inited)
 		release_bus_freq(BUS_FREQ_HIGH);
-
+#else
+	if (sport->dma_is_inited){
+		pm_qos_remove_request(&sport->pm_qos_req);
+		release_bus_freq(BUS_FREQ_HIGH);
+	}
+#endif
 	sport->dma_is_inited = 0;
 }
 
@@ -1181,6 +1177,11 @@ static int imx_uart_dma_init(struct imx_port *sport)
 	struct dma_slave_config slave_config = {};
 	struct device *dev = sport->port.dev;
 	int ret, i;
+#ifdef CONFIG_ARCH_ADVANTECH	
+	/* request high bus for DMA mode */
+	request_bus_freq(BUS_FREQ_HIGH);
+	pm_qos_add_request(&sport->pm_qos_req, PM_QOS_CPU_DMA_LATENCY, 0);
+#endif
 	/* Prepare for RX : */
 	sport->dma_chan_rx = dma_request_slave_channel(dev, "rx");
 	if (!sport->dma_chan_rx) {
@@ -1333,13 +1334,8 @@ static int imx_startup(struct uart_port *port)
 		udelay(1);
 
 	/* Can we enable the DMA support? */
-#ifdef CONFIG_ARCH_ADVANTECH
-	if (is_imx6q_uart(sport) && !uart_console(port)
-		&& !sport->dma_is_inited && !(sport->have_rtscts) &&IS_ENABLED(CONFIG_SMP))
-#else
 	if (is_imx6q_uart(sport) && !uart_console(port)
 		&& !sport->dma_is_inited)
-#endif
 		imx_uart_dma_init(sport);
 
 	if (sport->dma_is_inited)
@@ -1562,9 +1558,6 @@ imx_set_termios(struct uart_port *port, struct ktermios *termios,
 		} else {
 			termios->c_cflag &= ~CRTSCTS;
 		}
-#ifdef CONFIG_ARCH_ADVANTECH
-	}
-#else
 	} else if (port->rs485.flags & SER_RS485_ENABLED) {
 		/* disable transmitter */
 		if (port->rs485.flags & SER_RS485_RTS_AFTER_SEND)
@@ -1572,7 +1565,7 @@ imx_set_termios(struct uart_port *port, struct ktermios *termios,
 		else
 			imx_port_rts_inactive(sport, &ucr2);
 	}
-#endif
+
 	if (termios->c_cflag & CSTOPB)
 		ucr2 |= UCR2_STPB;
 	if (termios->c_cflag & PARENB) {
@@ -1801,6 +1794,46 @@ static void imx_poll_put_char(struct uart_port *port, unsigned char c)
 }
 #endif
 
+#ifdef CONFIG_ARCH_ADVANTECH
+//refer to kernel 5.4.70
+void uart_get_rs485_mode(struct device *dev, struct serial_rs485 *rs485conf)
+{
+        u32 rs485_delay[2];
+        int ret;
+        ret = device_property_read_u32_array(dev, "rs485-rts-delay",
+                                             rs485_delay, 2);
+        if (!ret) {
+                rs485conf->delay_rts_before_send = rs485_delay[0];
+                rs485conf->delay_rts_after_send = rs485_delay[1];
+        } else {
+                rs485conf->delay_rts_before_send = 0;
+                rs485conf->delay_rts_after_send = 0;
+        }
+
+        /*
+         * Clear full-duplex and enabled flags, set RTS polarity to active high
+         * to get to a defined state with the following properties:
+         */
+        rs485conf->flags &= ~(SER_RS485_RX_DURING_TX | SER_RS485_ENABLED |
+                              SER_RS485_RTS_AFTER_SEND);
+        rs485conf->flags |= SER_RS485_RTS_ON_SEND;
+
+        if (device_property_read_bool(dev, "rs485-rx-during-tx")){
+	      rs485conf->flags |= SER_RS485_RX_DURING_TX;
+	}
+
+        if (device_property_read_bool(dev, "linux,rs485-enabled-at-boot-time")){
+                rs485conf->flags |= SER_RS485_ENABLED;
+	}
+
+        if (device_property_read_bool(dev, "rs485-rts-active-low")) {
+                rs485conf->flags &= ~SER_RS485_RTS_ON_SEND;
+                rs485conf->flags |= SER_RS485_RTS_AFTER_SEND;
+        }
+}
+#endif
+
+
 static int imx_rs485_config(struct uart_port *port,
 			    struct serial_rs485 *rs485conf)
 {
@@ -1818,16 +1851,10 @@ static int imx_rs485_config(struct uart_port *port,
 	if (rs485conf->flags & SER_RS485_ENABLED) {
 		/* disable transmitter */
 		temp = readl(sport->port.membase + UCR2);
-#ifndef CONFIG_ARCH_ADVANTECH
 		if (rs485conf->flags & SER_RS485_RTS_AFTER_SEND)
 			imx_port_rts_active(sport, &temp);
 		else
 			imx_port_rts_inactive(sport, &temp);
-#else
-		temp &= ~UCR2_CTSC;
-		temp &= ~UCR2_CTS;
-		temp |= UCR2_IRTS;
-#endif
 		writel(temp, sport->port.membase + UCR2);
 	}
 
@@ -1839,18 +1866,26 @@ static int imx_rs485_config(struct uart_port *port,
 		writel(temp, sport->port.membase + UCR2);
 	}
 
+#ifdef CONFIG_ARCH_ADVANTECH
+	if (rs485conf->flags & SER_RS485_ENABLED) {
+		temp = readl(sport->port.membase + UCR2);
+		rs485conf->flags |= SER_RS485_RX_DURING_TX;
+		rs485conf->flags &= ~SER_RS485_RTS_ON_SEND;
+		rs485conf->flags |= SER_RS485_RTS_AFTER_SEND;
+		writel(temp, sport->port.membase + UCR2);
+	}
+#endif
+
 	port->rs485 = *rs485conf;
 
 	return 0;
 }
-
 #ifdef CONFIG_ARCH_ADVANTECH
 /*
  * Handle TIOCSRS485 & TIOCSRS485 ioctl for RS-485 support
  */
 static int imx_ioctl(struct uart_port *port, unsigned int cmd, unsigned long arg)
 {
-#if 1
 	struct serial_rs485 rs485conf;
 	struct imx_port *sport = (struct imx_port *)port;
 
@@ -1873,7 +1908,7 @@ static int imx_ioctl(struct uart_port *port, unsigned int cmd, unsigned long arg
 		default:
 			return -ENOIOCTLCMD;
 	}
-#endif
+
 	return 0;
 }
 #endif
@@ -2213,7 +2248,12 @@ static int serial_imx_probe(struct platform_device *pdev)
 	int ret = 0, reg;
 	struct resource *res;
 	int txirq, rxirq, rtsirq;
-
+#ifdef CONFIG_ARCH_ADVANTECH
+	struct device *dev = &pdev->dev;
+	enum of_gpio_flags flags;
+	int uart_mode_sel_gpio = 
+		of_get_named_gpio_flags(dev->of_node, "uart-sel-gpio", 0, &flags);
+#endif
 	sport = devm_kzalloc(&pdev->dev, sizeof(*sport), GFP_KERNEL);
 	if (!sport)
 		return -ENOMEM;
@@ -2289,6 +2329,29 @@ static int serial_imx_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "failed to enable per clk: %d\n", ret);
 		return ret;
 	}
+
+#ifdef CONFIG_ARCH_ADVANTECH
+//refer to kernel 5.4.70
+	uart_get_rs485_mode(&pdev->dev, &sport->port.rs485);
+        if (sport->port.rs485.flags & SER_RS485_ENABLED &&
+            (!sport->have_rtscts && !sport->have_rtsgpio))
+                dev_err(&pdev->dev, "no RTS control, disabling rs485\n");
+
+        /*
+         * If using the i.MX UART RTS/CTS control then the RTS (CTS_B)
+         * signal cannot be set low during transmission in case the
+         * receiver is off (limitation of the i.MX UART IP).
+         */
+        if (sport->port.rs485.flags & SER_RS485_ENABLED &&
+            sport->have_rtscts && !sport->have_rtsgpio &&
+            (!(sport->port.rs485.flags & SER_RS485_RTS_ON_SEND) &&
+             !(sport->port.rs485.flags & SER_RS485_RX_DURING_TX)))
+                dev_err(&pdev->dev,
+                        "low-active RTS not possible when receiver is off, enabling receiver\n");
+
+        imx_rs485_config(&sport->port, &sport->port.rs485);
+#endif
+
 
 	/* Disable interrupts before requesting them */
 	reg = readl_relaxed(sport->port.membase + UCR1);
@@ -2371,12 +2434,6 @@ static int serial_imx_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, sport);
 
 #ifdef CONFIG_ARCH_ADVANTECH
-	struct device *dev = &pdev->dev;
-	enum of_gpio_flags flags;
-
-	int uart_mode_sel_gpio = 
-		of_get_named_gpio_flags(dev->of_node, "uart-sel-gpio", 0, &flags);
-
 	if (gpio_is_valid(uart_mode_sel_gpio))
 	{
 		ret = gpio_request(uart_mode_sel_gpio,"UART Mode Select");
