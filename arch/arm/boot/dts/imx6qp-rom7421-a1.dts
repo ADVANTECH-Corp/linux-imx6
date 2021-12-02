@@ -599,13 +599,6 @@
 	status = "okay";
 };
 
-&fec {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_enet1_1 &pinctrl_enet1_rst_1>;
-	phy-mode = "rgmii";
-	phy-reset-gpios = <&gpio1 25 1>; /* GPIO_ACTIVE_LOW 1 */
-	status = "okay";
-};
 
 &v4l2_capture_1 {
 	status = "okay";
