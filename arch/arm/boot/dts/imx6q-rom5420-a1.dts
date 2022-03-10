@@ -433,8 +433,8 @@
 &fec {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet1_1 &pinctrl_enet1_rst_1>;
-	phy-reset-gpios = <&gpio1 25 1>; /* GPIO_ACTIVE_LOW 1 */
-	phy-reset-duration = <20>;
+	//phy-reset-gpios = <&gpio1 25 1>; /* GPIO_ACTIVE_LOW 1 */
+	//phy-reset-duration = <20>;
 	status = "okay";
 };
 
