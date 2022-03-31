@@ -465,6 +465,7 @@
 				SC_P_ENET0_RGMII_RXD1_CONN_ENET0_RGMII_RXD1	0x00000060
 				SC_P_ENET0_RGMII_RXD2_CONN_ENET0_RGMII_RXD2	0x00000060
 				SC_P_ENET0_RGMII_RXD3_CONN_ENET0_RGMII_RXD3	0x00000060
+				SC_P_GPT0_COMPARE_LSIO_GPIO0_IO16		0x00000020
 			>;
 		};
 
@@ -917,10 +918,11 @@
 		#size-cells = <0>;
 
 		ethphy0: ethernet-phy@0 {
+			/* Realtek RTL8211F (0x001cc916) */
 			compatible = "ethernet-phy-ieee802.3-c22";
-			reg = <4>;
-			at803x,eee-disabled;
-			at803x,vddio-1p8v;
+			reg = <1>;
+			interrupt-parent = <&gpio0>;
+			interrupts = <16 IRQ_TYPE_LEVEL_LOW>;
 		};
 
 		/*ethphy1: ethernet-phy@1 {
