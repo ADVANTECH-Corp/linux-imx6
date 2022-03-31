@@ -562,11 +562,12 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		ethphy0: ethernet-phy@4 {
+		ethphy0: ethernet-phy@0 {
+			/* Realtek RTL8211F (0x001cc916) */
 			compatible = "ethernet-phy-ieee802.3-c22";
-			reg = <4>;
-			at803x,led-act-blind-workaround;
-			at803x,eee-disabled;
+			reg = <1>;
+			interrupt-parent = <&gpio1>;
+			interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
 		};
 	};
 };
