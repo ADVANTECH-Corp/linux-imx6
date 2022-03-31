@@ -645,17 +645,15 @@
 		#size-cells = <0>;
 
 		ethphy0: ethernet-phy@0 {
+			/* Realtek RTL8211F (0x001cc916) */
 			compatible = "ethernet-phy-ieee802.3-c22";
-			reg = <4>;
-			at803x,eee-disabled;
-			at803x,vddio-1p8v;
+			reg = <1>;
 		};
 
 		ethphy1: ethernet-phy@1 {
+			/* Realtek RTL8211F (0x001cc916) */
 			compatible = "ethernet-phy-ieee802.3-c22";
-			reg = <6>;
-			at803x,eee-disabled;
-			at803x,vddio-1p8v;
+			reg = <3>;
 		};
 	};
 };
@@ -667,6 +665,7 @@
 	phy-handle = <&ethphy1>;
 	fsl,magic-packet;
 	fsl,rgmii_rxc_dly;
+	phy-addr2 = <3>;
 	status = "okay";
 };
 
