@@ -3934,7 +3934,12 @@ fec_probe(struct platform_device *pdev)
 			fep->mii_bus->write(fep->mii_bus, phydev->mdio.addr, 0x11, val);
 
 			val = fep->mii_bus->read(fep->mii_bus, phydev->mdio.addr, 0x15);
+			if(fep->phy_interface==0x0b) //ROM7720
+			val &= ~(0x1 << 3);//disable RX delay
+			else
 			val |= (0x1 << 3);//enable RX delay
+
+			pr_info("[ADV] RX_delay set 0x15=[%x]",val);
 			fep->mii_bus->write(fep->mii_bus, phydev->mdio.addr, 0x15, val);
 			fep->mii_bus->write(fep->mii_bus, phydev->mdio.addr, 0x1f, 0x0000);
 		}
