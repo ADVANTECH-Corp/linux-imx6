@@ -3715,7 +3715,7 @@ fec_probe(struct platform_device *pdev)
 		/*Change PHY LED status*/
 		msleep(5);
 		fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x1f, 0x0d04);
-		fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x10, 0xa050);
+		fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x10, 0x8a08);
 		fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x11, 0x0000);
 		fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x1f, 0x0000);
 	}
