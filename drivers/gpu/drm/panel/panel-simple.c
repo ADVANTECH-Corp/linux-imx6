@@ -516,7 +516,7 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 	panel->desc = of_desc;
 	panel->dev = dev;
 #else
-	panel->desc = desc
+	panel->desc = desc;
 #endif
 	panel->supply = devm_regulator_get(dev, "power");
 	if (IS_ERR(panel->supply))

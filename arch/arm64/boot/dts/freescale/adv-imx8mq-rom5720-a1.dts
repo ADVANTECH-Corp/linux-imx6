@@ -538,6 +538,10 @@
 	};
 };
 
+&crypto {
+       status = "disabled";
+};
+
 &fec1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_fec1>;
