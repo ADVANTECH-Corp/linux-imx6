@@ -499,7 +499,6 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
 	imx6qp-zii-rdu2.dtb
 dtb-$(CONFIG_SOC_IMX6SL) += \
 	imx6sl-evk.dtb \
-	imx6sl-evk-btwifi.dtb \
 	imx6sl-evk-ldo.dtb \
 	imx6sl-evk-csi.dtb \
 	imx6sl-evk-uart.dtb \
@@ -1264,5 +1263,15 @@ endif
 dtstree		:= $(srctree)/$(src)
 dtb-$(CONFIG_OF_ALL_DTBS) := $(patsubst $(dtstree)/%.dts,%.dtb, $(wildcard $(dtstree)/*.dts))
 
-always		:= $(dtb-y)
+DTB_NAMES := $(subst $\",,$(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE_NAMES))
+ifneq ($(DTB_NAMES),)
+DTB_LIST := $(addsuffix .dtb,$(DTB_NAMES))
+else
+DTB_LIST := $(dtb-y)
+endif
+
+targets += dtbs dtbs_install
+targets += $(DTB_LIST)
+
+always		:= $(DTB_LIST)
 clean-files	:= *.dtb

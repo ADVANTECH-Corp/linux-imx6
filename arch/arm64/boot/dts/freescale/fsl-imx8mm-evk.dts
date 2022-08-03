@@ -17,6 +17,33 @@
 #include "fsl-imx8mm.dtsi"
 
 / {
+	firmware {
+		android {
+			compatible = "android,firmware";
+			fstab {
+				compatible = "android,fstab";
+				vendor {
+					compatible = "android,vendor";
+					/* sd card node which used if androidboot.storage_type=sd */
+					dev_sd = "/dev/block/platform/30b50000.mmc/by-name/vendor";
+					/* emmc node which used if androidboot.storage_type=emmc */
+					dev_emmc = "/dev/block/platform/30b60000.mmc/by-name/vendor";
+					type = "ext4";
+					mnt_flags = "ro,barrier=1,inode_readahead_blks=8";
+					fsmgr_flags = "wait,slotselect,avb";
+				};
+			};
+			vbmeta {
+				/*we need use FirstStageMountVBootV2 if we enable avb*/
+				compatible = "android,vbmeta";
+				/*parts means the partition witch can be mount in first stage*/
+				parts = "vbmeta,boot,system,vendor";
+			};
+		};
+	};
+};
+
+/ {
 	model = "FSL i.MX8MM EVK board";
 	compatible = "fsl,imx8mm-evk", "fsl,imx8mm";
 
@@ -37,12 +64,10 @@
 		};
 	};
 
-	modem_reset: modem-reset {
-		compatible = "gpio-reset";
-		reset-gpios = <&gpio2 6 GPIO_ACTIVE_LOW>;
-		reset-delay-us = <2000>;
-		reset-post-delay-ms = <40>;
-		#reset-cells = <0>;
+	bt_rfkill {
+		compatible = "fsl,mxc_bt_rfkill";
+		bt-power-gpios = <&gpio2 6 GPIO_ACTIVE_LOW>;
+		status ="okay";
 	};
 
 	ir_recv: ir-receiver {
@@ -939,7 +964,6 @@
 	assigned-clocks = <&clk IMX8MM_CLK_UART1_SRC>;
 	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
 	fsl,uart-has-rtscts;
-	resets = <&modem_reset>;
 	status = "okay";
 };
 
@@ -1042,4 +1066,8 @@
 	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
 	assigned-clock-rates = <0>, <196608000>;
 	status = "okay";
+};
+
+&crypto {
+       status = "disabled";
 };
