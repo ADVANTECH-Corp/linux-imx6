@@ -17,6 +17,8 @@
 	arm-supply = <&sw2_reg>;
 };
 
+/*
+
 &iomuxc {
 	imx6qdl-sabresd {
 		pinctrl_usdhc2: usdhc2grp {
@@ -51,6 +53,8 @@
 	};
 };
 
+*/
+
 &mxcfb1 {
 	prefetch;
 };
@@ -78,7 +82,7 @@
 };
 
 &pcie {
-	pcie-bus-supply = <&vgen3_reg>; /* 1.8v pwr up pcie ext osc on revb */
+	/* pcie-bus-supply = <&vgen3_reg>;*/ /* 1.8v pwr up pcie ext osc on revb */
 	reset-gpio = <&gpio7 12 0>;
 	status = "okay";
 };

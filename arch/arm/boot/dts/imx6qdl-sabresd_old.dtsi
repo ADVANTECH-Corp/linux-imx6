@@ -610,8 +610,6 @@
 	};
 };
 
-/*
-
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog>;
@@ -778,7 +776,7 @@
 			>;
 		};
 
-		pinctrl_ipu1_2: ipu1grp-2 {  //parallel camera
+		pinctrl_ipu1_2: ipu1grp-2 { /* parallel camera */
 			fsl,pins = <
 				MX6QDL_PAD_CSI0_DAT12__IPU1_CSI0_DATA12    0x80000000
 				MX6QDL_PAD_CSI0_DAT13__IPU1_CSI0_DATA13    0x80000000
@@ -907,8 +905,6 @@
 	};
 };
 
-*/
-
 &ldb {
 	status = "okay";
 
@@ -974,8 +970,8 @@
 };
 
 &pcie {
-	/* pinctrl-names = "default"; */
-	/* pinctrl-0 = <&pinctrl_pcie>; */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_pcie>;
 	reset-gpio = <&gpio7 12 0>;
 	status = "okay";
 };
@@ -995,8 +991,8 @@
 };
 
 &uart1 {
-	/* pinctrl-names = "default"; */
-	/* pinctrl-0 = <&pinctrl_uart1>; */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1>;
 	status = "okay";
 };
 
@@ -1063,8 +1059,8 @@
 };
 
 &wdog2 {
-	/* pinctrl-names = "default"; */
-	/* pinctrl-0 = <&pinctrl_wdog>; */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_wdog>;
 	fsl,wdog_b;
 	status = "okay";
 };

@@ -63,6 +63,11 @@ struct imx6_pcie {
 	void __iomem		*mem_base;
 	struct regulator	*pcie_phy_regulator;
 	struct regulator	*pcie_bus_regulator;
+	u32			tx_deemph_gen1;
+	u32			tx_deemph_gen2_3p5db;
+	u32			tx_deemph_gen2_6db;
+	u32			tx_swing_full;
+	u32			tx_swing_low;
 };
 
 /* PCIe Root Complex registers (memory-mapped) */
@@ -539,15 +544,20 @@ static void imx6_pcie_init_phy(struct pcie_port *pp)
 				IMX6Q_GPR12_LOS_LEVEL, IMX6Q_GPR12_LOS_LEVEL_9);
 
 		regmap_update_bits(imx6_pcie->iomuxc_gpr, IOMUXC_GPR8,
-				IMX6Q_GPR8_TX_DEEMPH_GEN1, 20 << 0);
+				IMX6Q_GPR8_TX_DEEMPH_GEN1,
+				imx6_pcie->tx_deemph_gen1 << 0);
 		regmap_update_bits(imx6_pcie->iomuxc_gpr, IOMUXC_GPR8,
-				IMX6Q_GPR8_TX_DEEMPH_GEN2_3P5DB, 20 << 6);
+				IMX6Q_GPR8_TX_DEEMPH_GEN2_3P5DB,
+				imx6_pcie->tx_deemph_gen2_3p5db << 6);
 		regmap_update_bits(imx6_pcie->iomuxc_gpr, IOMUXC_GPR8,
-				IMX6Q_GPR8_TX_DEEMPH_GEN2_6DB, 20 << 12);
+				IMX6Q_GPR8_TX_DEEMPH_GEN2_6DB,
+				imx6_pcie->tx_deemph_gen2_6db << 12);
 		regmap_update_bits(imx6_pcie->iomuxc_gpr, IOMUXC_GPR8,
-				IMX6Q_GPR8_TX_SWING_FULL, 115 << 18);
+				IMX6Q_GPR8_TX_SWING_FULL,
+				imx6_pcie->tx_swing_full << 18);
 		regmap_update_bits(imx6_pcie->iomuxc_gpr, IOMUXC_GPR8,
-				IMX6Q_GPR8_TX_SWING_LOW, 115 << 25);
+				IMX6Q_GPR8_TX_SWING_LOW,
+				imx6_pcie->tx_swing_low << 25);
 	}
 
 	/* configure the device type */
@@ -1303,6 +1313,28 @@ static int __init imx6_pcie_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "unable to find iomuxc registers\n");
 		return PTR_ERR(imx6_pcie->iomuxc_gpr);
 	}
+
+	/* Grab PCIe PHY Tx Settings */
+	if (of_property_read_u32(np, "fsl,tx-deemph-gen1",
+				 &imx6_pcie->tx_deemph_gen1))
+		imx6_pcie->tx_deemph_gen1 = 20;
+
+	if (of_property_read_u32(np, "fsl,tx-deemph-gen2-3p5db",
+				 &imx6_pcie->tx_deemph_gen2_3p5db))
+		imx6_pcie->tx_deemph_gen2_3p5db = 20;
+
+	if (of_property_read_u32(np, "fsl,tx-deemph-gen2-6db",
+				 &imx6_pcie->tx_deemph_gen2_6db))
+		imx6_pcie->tx_deemph_gen2_6db = 20;
+
+	if (of_property_read_u32(np, "fsl,tx-swing-full",
+				 &imx6_pcie->tx_swing_full))
+		imx6_pcie->tx_swing_full = 115;
+
+	if (of_property_read_u32(np, "fsl,tx-swing-low",
+				 &imx6_pcie->tx_swing_low))
+		imx6_pcie->tx_swing_low = 115;
+
 
 	if (IS_ENABLED(CONFIG_EP_MODE_IN_EP_RC_SYS)) {
 		int i;

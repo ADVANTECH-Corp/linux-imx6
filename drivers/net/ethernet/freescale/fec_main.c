@@ -3353,6 +3353,7 @@ static void fec_reset_phy(struct platform_device *pdev)
 	}
 	msleep(msec);
 	gpio_set_value(phy_reset, 1);
+	msleep(80); // advantech
 }
 #else /* CONFIG_OF */
 static void fec_reset_phy(struct platform_device *pdev)
@@ -3448,6 +3449,12 @@ fec_probe(struct platform_device *pdev)
 	struct device_node *np = pdev->dev.of_node, *phy_node;
 	int num_tx_qs;
 	int num_rx_qs;
+
+	// advantech
+	struct proc_dir_entry *proc_entry = NULL ;
+	struct phy_device *phydev;
+	char node_name[32];
+	// advantech
 
 	fec_enet_get_queue_num(pdev, &num_tx_qs, &num_rx_qs);
 
@@ -3606,6 +3613,21 @@ fec_probe(struct platform_device *pdev)
 	ret = fec_enet_mii_init(pdev);
 	if (ret)
 		goto failed_mii_init;
+
+	// advantech
+	phydev = phy_find_first(fep->mii_bus);
+        if (phydev && (0x001cc916 == phydev->phy_id)) {
+        /*Change PHY LED status*/
+        msleep(5);
+        fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x1f, 0x0d04);
+        fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x10, 0xa050);
+        fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x11, 0x0000);
+        fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x1f, 0x0000);
+        fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x1f, 0x0a43);
+        fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x1d, 0x0000);
+        fep->mii_bus->write(fep->mii_bus, phydev->addr, 0x1f, 0x0000);
+        }
+	// advantech
 
 	/* Carrier starts down, phylib will bring it up */
 	netif_carrier_off(ndev);
