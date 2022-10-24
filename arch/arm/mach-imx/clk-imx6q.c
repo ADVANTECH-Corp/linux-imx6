@@ -764,7 +764,7 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
 	clk[IMX6QDL_CLK_EIM_SLOW]     = imx_clk_gate2("eim_slow",      "emi_slow_podf",     base + 0x80, 10);
 	clk[IMX6QDL_CLK_VDO_AXI]      = imx_clk_gate2("vdo_axi",       "vdo_axi_sel",       base + 0x80, 12);
 	clk[IMX6QDL_CLK_VPU_AXI]      = imx_clk_gate2("vpu_axi",       "vpu_axi_podf",      base + 0x80, 14);
-	if (cpu_is_imx6q() && imx_get_soc_revision() == IMX_CHIP_REVISION_2_0) {
+//	if (cpu_is_imx6q() && imx_get_soc_revision() == IMX_CHIP_REVISION_2_0) {
 		clk[IMX6QDL_CLK_PRE0] = imx_clk_gate2("pre0",          "pre_axi",         base + 0x80, 16);
 		clk[IMX6QDL_CLK_PRE1] = imx_clk_gate2("pre1",          "pre_axi",         base + 0x80, 18);
 		clk[IMX6QDL_CLK_PRE2] = imx_clk_gate2("pre2",          "pre_axi",         base + 0x80, 20);
@@ -773,7 +773,7 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
 		clk[IMX6QDL_CLK_PRG1_AXI] = imx_clk_gate2_shared("prg1_axi", "ipu2_podf",   base + 0x80, 26, &share_count_prg1);
 		clk[IMX6QDL_CLK_PRG0_APB] = imx_clk_gate2_shared("prg0_apb", "ipg",         base + 0x80, 24, &share_count_prg0);
 		clk[IMX6QDL_CLK_PRG1_APB] = imx_clk_gate2_shared("prg1_apb", "ipg",         base + 0x80, 26, &share_count_prg1);
-	}
+//	}
 	clk[IMX6QDL_CLK_CKO1]         = imx_clk_gate("cko1",           "cko1_podf",         base + 0x60, 7);
 	clk[IMX6QDL_CLK_CKO2]         = imx_clk_gate("cko2",           "cko2_podf",         base + 0x60, 24);
 
@@ -921,7 +921,7 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
 	 * for i.MX6QP with speeding grading set to 1.2GHz,
 	 * VPU should run at 396MHz.
 	 */
-	if (cpu_is_imx6q() && imx_get_soc_revision() == IMX_CHIP_REVISION_2_0) {
+//	if (cpu_is_imx6q() && imx_get_soc_revision() == IMX_CHIP_REVISION_2_0) {
 		np = of_find_compatible_node(NULL, NULL, "fsl,imx6q-ocotp");
 		WARN_ON(!np);
 
@@ -945,6 +945,6 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
 			pr_info("VPU frequency set to 396MHz!\n");
 		}
 		iounmap(base);
-	}
+//	}
 }
 CLK_OF_DECLARE(imx6q, "fsl,imx6q-ccm", imx6q_clocks_init);
