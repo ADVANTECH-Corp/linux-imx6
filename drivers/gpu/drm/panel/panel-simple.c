@@ -39,6 +39,9 @@
 #ifdef CONFIG_ARCH_ADVANTECH
 #include <video/mipi_display.h>
 #include <video/of_display_timing.h>
+
+int dsi_init_done = 0;
+
 struct dsi_ctrl_hdr {
 	u8 dtype;	/* data type */
 	u8 wait;	/* ms */
@@ -109,8 +112,10 @@ struct panel_simple {
 
 	struct gpio_desc *enable_gpio;
 #ifdef CONFIG_ARCH_ADVANTECH
+	bool no_wakeup_init;
 	struct mipi_dsi_device *dsi;
 	struct device *dev;
+	struct dsi_panel_cmds *init_cmds;
 	struct dsi_panel_cmds *on_cmds;
 	struct dsi_panel_cmds *off_cmds;
 #endif
@@ -334,6 +339,9 @@ static int panel_simple_of_get_native_mode(struct panel_simple *panel)
 static int panel_simple_disable(struct drm_panel *panel)
 {
 	struct panel_simple *p = to_panel_simple(panel);
+#ifdef CONFIG_ARCH_ADVANTECH
+	int err;
+#endif
 
 	if (!p->enabled)
 		return 0;
@@ -343,6 +351,16 @@ static int panel_simple_disable(struct drm_panel *panel)
 		p->backlight->props.state |= BL_CORE_FBBLANK;
 		backlight_update_status(p->backlight);
 	}
+
+#ifdef CONFIG_ARCH_ADVANTECH
+	if (p->off_cmds) {
+		printk("DSI panel enter sleep mode\n");
+
+		err = panel_simple_dsi_send_cmds(p, p->off_cmds);
+		if (err)
+			dev_err(p->dev, "failed to send off cmds\n");
+	}
+#endif
 
 	if (p->desc->delay.disable)
 		msleep(p->desc->delay.disable);
@@ -403,18 +421,51 @@ static int panel_simple_enable(struct drm_panel *panel)
 #ifdef CONFIG_ARCH_ADVANTECH
 	int err;
 #endif
+
 	if (p->enabled)
 		return 0;
 
 	if (p->desc->delay.enable)
 		msleep(p->desc->delay.enable);
+
 #ifdef CONFIG_ARCH_ADVANTECH
-	if (p->on_cmds) {
-		err = panel_simple_dsi_send_cmds(p, p->on_cmds);
-		if (err)
-			dev_err(p->dev, "failed to send on cmds\n");
+	if (p->no_wakeup_init)
+	{
+		if (dsi_init_done == 0)
+		{
+			if (p->init_cmds) {
+				printk("DSI panel init\n");
+
+				err = panel_simple_dsi_send_cmds(p, p->init_cmds);
+				if (err)
+					dev_err(p->dev, "failed to send init cmds\n");
+			}
+
+			dsi_init_done = 1;
+		}
+		else
+		{
+			if (p->on_cmds) {
+				printk("DSI panel leave sleep mode\n");
+
+				err = panel_simple_dsi_send_cmds(p, p->on_cmds);
+				if (err)
+					dev_err(p->dev, "failed to send on cmds\n");
+			}
+		}
+	}
+	else //always wakeup init
+	{
+		if (p->init_cmds) {
+			printk("DSI panel init\n");
+
+			err = panel_simple_dsi_send_cmds(p, p->init_cmds);
+			if (err)
+				dev_err(p->dev, "failed to send init cmds\n");
+		}
 	}
 #endif
+
 	if (p->backlight) {
 		p->backlight->props.state &= ~BL_CORE_FBBLANK;
 		p->backlight->props.power = FB_BLANK_UNBLANK;
@@ -430,7 +481,6 @@ static int panel_simple_get_modes(struct drm_panel *panel)
 {
 	struct panel_simple *p = to_panel_simple(panel);
 	int num = 0;
-
 
 	/* probe EDID if a DDC bus is available */
 	if (p->ddc) {
@@ -2746,24 +2796,41 @@ static int panel_simple_dsi_probe(struct mipi_dsi_device *dsi)
 	if (!of_property_read_u32(dsi->dev.of_node, "dsi,lanes", &val))
 		dsi->lanes = val;
 
+	panel->no_wakeup_init = of_property_read_bool(dsi->dev.of_node, "no-wakeup-init");
+
 	data = of_get_property(dsi->dev.of_node, "panel-init-sequence", &len);
 	if (data) {
-		panel->on_cmds = devm_kzalloc(&dsi->dev,
-					      sizeof(*panel->on_cmds),
+		panel->init_cmds = devm_kzalloc(&dsi->dev,
+					      sizeof(*panel->init_cmds),
 					      GFP_KERNEL);
-		if (!panel->on_cmds)
+		if (!panel->init_cmds)
 			return -ENOMEM;
 
 		err = panel_simple_dsi_parse_dcs_cmds(&dsi->dev, data, len,
-						      panel->on_cmds);
+						      panel->init_cmds);
 		if (err) {
 			dev_err(&dsi->dev, "failed to parse panel init sequence\n");
 			return err;
 		}
 	}
 
+	data = of_get_property(dsi->dev.of_node, "panel-on-sequence", &len);
+	if (data) {
+		panel->on_cmds = devm_kzalloc(&dsi->dev,
+					       sizeof(*panel->on_cmds),
+					       GFP_KERNEL);
+		if (!panel->on_cmds)
+			return -ENOMEM;
 
-	data = of_get_property(dsi->dev.of_node, "panel-exit-sequence", &len);
+		err = panel_simple_dsi_parse_dcs_cmds(&dsi->dev, data, len,
+						      panel->on_cmds);
+		if (err) {
+			dev_err(&dsi->dev, "failed to parse panel on sequence\n");
+			return err;
+		}
+	}
+
+	data = of_get_property(dsi->dev.of_node, "panel-off-sequence", &len);
 	if (data) {
 		panel->off_cmds = devm_kzalloc(&dsi->dev,
 					       sizeof(*panel->off_cmds),
@@ -2774,7 +2841,7 @@ static int panel_simple_dsi_probe(struct mipi_dsi_device *dsi)
 		err = panel_simple_dsi_parse_dcs_cmds(&dsi->dev, data, len,
 						      panel->off_cmds);
 		if (err) {
-			dev_err(&dsi->dev, "failed to parse panel exit sequence\n");
+			dev_err(&dsi->dev, "failed to parse panel off sequence\n");
 			return err;
 		}
 	}
