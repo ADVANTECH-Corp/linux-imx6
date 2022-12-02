@@ -85,6 +85,7 @@ struct imx_pcie {
 	int			reset_gpio;
 #ifdef CONFIG_ARCH_ADVANTECH
 	int                     reset_time;
+	int                     dis_gpio2;
 #endif
 	bool			gpio_active_high;
 	struct clk		*pcie_bus;
@@ -2126,6 +2127,11 @@ static int pci_imx_suspend_noirq(struct device *dev)
 			regulator_disable(imx_pcie->pcie_bus_regulator);
 	}
 
+#ifdef CONFIG_ARCH_ADVANTECH
+	if (gpio_is_valid(imx_pcie->dis_gpio2))
+                gpio_set_value_cansleep(imx_pcie->dis_gpio2, 0);
+#endif
+
 	return 0;
 }
 
@@ -2174,6 +2180,10 @@ static int pci_imx_resume_noirq(struct device *dev)
 	struct imx_pcie *imx_pcie = dev_get_drvdata(dev);
 	struct pcie_port *pp = &imx_pcie->pci->pp;
 
+#ifdef CONFIG_ARCH_ADVANTECH
+	if (gpio_is_valid(imx_pcie->dis_gpio2))
+                gpio_set_value_cansleep(imx_pcie->dis_gpio2, 1);
+#endif
 	if (unlikely(imx_pcie->variant == IMX6Q)) {
 		/*
 		 * L2 can exit by 'reset' or Inband beacon (from remote EP)
@@ -2400,6 +2410,20 @@ static int imx_pcie_probe(struct platform_device *pdev)
 	} else if (imx_pcie->dis_gpio == -EPROBE_DEFER) {
 		return imx_pcie->dis_gpio;
 	}
+
+#ifdef CONFIG_ARCH_ADVANTECH
+        imx_pcie->dis_gpio2 = of_get_named_gpio(node, "disable-gpio2", 0);
+        if (gpio_is_valid(imx_pcie->dis_gpio2)) {
+                ret = devm_gpio_request_one(&pdev->dev, imx_pcie->dis_gpio2,
+                                            GPIOF_OUT_INIT_HIGH, "PCIe DIS2");
+                if (ret) {
+                        dev_err(&pdev->dev, "unable to get disable gpio2\n");
+                        return ret;
+                }
+        } else if (imx_pcie->dis_gpio2 == -EPROBE_DEFER) {
+                return imx_pcie->dis_gpio2;
+        }
+#endif
 
 	imx_pcie->power_on_gpio = of_get_named_gpio(node, "power-on-gpio", 0);
 	if (gpio_is_valid(imx_pcie->power_on_gpio)) {
