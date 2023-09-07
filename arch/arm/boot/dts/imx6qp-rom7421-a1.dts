@@ -26,6 +26,11 @@
 		board-cpu = "DualPlus";
 	};
 
+	aliases {
+		rtc0 = &s35390a;
+		rtc1 = &snvs_rtc;
+	};
+
 	regulators {
 		reg_usb_otg_vbus: usb_otg_vbus {
 			compatible = "regulator-fixed";
@@ -150,6 +155,13 @@
 		wdt-out = <&gpio7 12 0>;
 		reg = <0x29>;
 	};
+
+	s35390a: s35390a@30 {
+		compatible = "sii,s35390a";
+		reg = <0x30>;
+		status = "okay";
+	};
+
 };
 
 &i2c2 {
@@ -631,4 +643,8 @@
 
 &wdog1 {
 	status = "disabled";
+};
+
+&snvs_rtc {
+        status = "disabled";
 };

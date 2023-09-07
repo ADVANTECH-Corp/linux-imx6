@@ -223,7 +223,9 @@ void __init imx_init_revision_from_anatop(void)
 			revision = IMX_CHIP_REVISION_1_0;
 		break;
 	case 1:
-		revision = IMX_CHIP_REVISION_1_1;
+		// revision = IMX_CHIP_REVISION_1_1;
+		/* for advantech dms-ba16 with i.MX6DP rev 1.1 use */
+		revision = IMX_CHIP_REVISION_2_0;
 		break;
 	case 2:
 		revision = IMX_CHIP_REVISION_1_2;

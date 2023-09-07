@@ -154,6 +154,10 @@ static unsigned int share_count_prg1;
 #define OCOTP_CFG3_SPEED_SHIFT		16
 #define OCOTP_CFG3_SPEED_1P2GHZ		0x3
 
+#define OCOTP_CFG3			0x440
+#define OCOTP_CFG3_SPEED_SHIFT		16
+#define OCOTP_CFG3_SPEED_1P2GHZ		0x3
+
 static int ldb_di_sel_by_clock_id(int clock_id)
 {
 	switch (clock_id) {
