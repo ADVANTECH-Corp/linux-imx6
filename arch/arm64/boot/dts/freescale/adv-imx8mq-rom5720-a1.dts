@@ -126,7 +126,7 @@
                 compatible = "gpio-keys";
                 #address-cells = <1>;
                 #size-cells = <0>;
-                pinctrl-0 = <&pinctrl_lid_key &pinctrl_sleep_key>;
+                pinctrl-0 = <&pinctrl_lid_key &pinctrl_sleep_key &pinctrl_pcie_wake>;
                 pinctrl-names = "default";
                 lid@1 {
 			label = "LID KEY";
@@ -143,6 +143,15 @@
 			linux,code = <116>;     /* KEY_POWER */
 			wakeup-source;
 			debounce-interval = <100>;
+                };
+                
+                pcie_wake@3 {
+                        label = "PCIE_WAKE";
+                        gpios = <&gpio3 14 GPIO_ACTIVE_LOW>;
+                        linux,input-type = <EV_PWR>;
+                        linux,code = <KEY_WAKEUP>; //KEY_WAKEUP 143
+                        wakeup-source;
+                        debounce-interval = <100>;
                 };
 	};
 
@@ -173,7 +182,7 @@
 				MX8MQ_IOMUXC_SAI5_RXD1_GPIO3_IO22		0x19	/* TEST */
 				MX8MQ_IOMUXC_SAI1_MCLK_GPIO4_IO20		0x19	/* UART_DBG_SEL */
 				MX8MQ_IOMUXC_NAND_CE1_B_GPIO3_IO2		0x19	/* RESET_DELAY */
-				
+				MX8MQ_IOMUXC_NAND_CE2_B_GPIO3_IO3               0x59				
 			>;
 		};
 		pinctrl_wdt_en_1: wdt_engrp-1 {
@@ -228,6 +237,12 @@
 				MX8MQ_IOMUXC_SAI5_MCLK_GPIO3_IO25		0x59	/* SLEEP */	
 			>;
 		};
+		
+		        pinctrl_pcie_wake: pcie_wake_grp {
+                        fsl,pins = <
+                                MX8MQ_IOMUXC_NAND_DQS_GPIO3_IO14		0x59    /* PCIE_WAKE# */
+                        >;
+                };
 
                 pinctrl_ecspi2: ecspi2grp {
                         fsl,pins = <
@@ -254,7 +269,7 @@
 				MX8MQ_IOMUXC_ENET_RXC_ENET1_RGMII_RXC	0x91
 				MX8MQ_IOMUXC_ENET_RX_CTL_ENET1_RGMII_RX_CTL	0x91
 				MX8MQ_IOMUXC_ENET_TX_CTL_ENET1_RGMII_TX_CTL	0x1f
-				MX8MQ_IOMUXC_GPIO1_IO09_GPIO1_IO9	0x19
+				MX8MQ_IOMUXC_GPIO1_IO11_GPIO1_IO11	0x19
 			>;
 		};
 
@@ -474,6 +489,7 @@
                 pinctrl_pcie0: pcie0grp {
                         fsl,pins = <
                                 MX8MQ_IOMUXC_SAI1_TXC_GPIO4_IO11	0x16	/* PCIE_B_RST */
+                                MX8MQ_IOMUXC_GPIO1_IO09_GPIO1_IO9       0x19	/* LAN_DISABLE# */
                         >;
                 };
 
@@ -548,15 +564,15 @@
 	phy-mode = "rgmii-id";
 	phy-handle = <&ethphy0>;
 	fsl,magic-packet;
-	status = "disabled";
+	status = "okay";
 
 	mdio {
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		ethphy0: ethernet-phy@4 {
+		ethphy0: ethernet-phy@0 {
 			compatible = "ethernet-phy-ieee802.3-c22";
-			reg = <4>;
+			//reg = <1>;
 			at803x,led-act-blind-workaround;
 			at803x,eee-disabled;
 		};
@@ -844,6 +860,7 @@
         pinctrl-names = "default";
         pinctrl-0 = <&pinctrl_pcie0>;
         reset-gpio = <&gpio4 11 GPIO_ACTIVE_LOW>;
+        disable-gpio2 = <&gpio1 9 GPIO_ACTIVE_LOW>;
         ext_osc = <1>;
         status = "okay";
 };
